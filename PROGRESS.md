@@ -46,7 +46,7 @@ It is multimodal: tabular transaction data + clickstream sessions + LLM-embedded
 | 2 | Great Expectations Validators | **Done ✓** | [validators.py](src/chrono_ltv/data/validators.py) |
 | 3 | Feature Engineering Pipeline | **Done ✓** | [pipeline.py](src/chrono_ltv/features/pipeline.py), [encoders.py](src/chrono_ltv/features/encoders.py) |
 | 4 | Survival Analysis Models | **Done ✓** | [base.py](src/chrono_ltv/models/base.py), [cox_ph.py](src/chrono_ltv/models/cox_ph.py), [xgb_survival.py](src/chrono_ltv/models/xgb_survival.py), [deepsurv.py](src/chrono_ltv/models/deepsurv.py) |
-| 5 | MLflow Trainer + Evaluator | Pending | `src/chrono_ltv/training/` *(stubs only)* |
+| 5 | MLflow Trainer + Evaluator | **Done ✓** | [trainer.py](src/chrono_ltv/training/trainer.py), [evaluator.py](src/chrono_ltv/training/evaluator.py) |
 | 6 | FastAPI Serving Layer | Pending | `src/chrono_ltv/serving/` *(stubs only)* |
 | 7 | Evidently Drift Monitor | Pending | `src/chrono_ltv/monitoring/` *(stubs only)* |
 | 8 | Behavioral / Invariance Tests | Pending | `tests/behavioral/` *(stubs only)* |
@@ -232,3 +232,6 @@ Known-resolved issues (do not re-introduce):
 - `np.row_stack` is deprecated in newer numpy — always use `np.vstack` for stacking survival function arrays
 - DeepSurv tests live in `tests/unit/test_deepsurv.py` (separate file) so that `pytest.importorskip("torch")` at module level does not skip the Cox/XGB tests in CI
 - `survival` extras group (`scikit-survival`, `xgboost`) installed in CI; `torch` is not (too large) — DeepSurv tests are skipped in CI and run locally only
+- MLflow tracking URIs on Windows: never use `file://` or bare `C:\...` paths — use `sqlite:///path/to/mlflow.db` in tests
+- `cumulative_dynamic_auc` raises `ValueError` on small CV folds when the censoring survival function hits zero — caught and treated as empty `td_auc` dict
+- `loguru.Logger` may not be importable at runtime on older loguru installs — annotate `get_logger` return as `Any` and guard `from loguru import Logger` under `TYPE_CHECKING`

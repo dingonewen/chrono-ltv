@@ -1,9 +1,14 @@
 """Centralised logging configuration using Loguru."""
 
-import sys
-from pathlib import Path
+from __future__ import annotations
 
-from loguru import Logger, logger
+import sys
+from typing import TYPE_CHECKING, Any
+
+from loguru import logger
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def configure_logging(
@@ -51,6 +56,6 @@ def configure_logging(
         )
 
 
-def get_logger(name: str) -> Logger:
+def get_logger(name: str) -> Any:
     """Return a child logger bound to *name* (module path)."""
     return logger.bind(name=name)
