@@ -43,8 +43,8 @@ It is multimodal: tabular transaction data + clickstream sessions + LLM-embedded
 | Step | Module | Status | Key Files |
 |------|--------|--------|-----------|
 | 1 | Data Stream Simulator | **Done ✓** | [simulator.py](src/chrono_ltv/data/simulator.py), [schemas.py](src/chrono_ltv/data/schemas.py) |
-| 2 | Great Expectations Validators | **In Progress** | `src/chrono_ltv/data/validators.py` *(this session)* |
-| 3 | Feature Engineering Pipeline | Pending | `src/chrono_ltv/features/pipeline.py` *(not yet written)* |
+| 2 | Great Expectations Validators | **Done ✓** | [validators.py](src/chrono_ltv/data/validators.py) |
+| 3 | Feature Engineering Pipeline | **In Progress** | `src/chrono_ltv/features/pipeline.py`, `encoders.py` *(this session)* |
 | 4 | Survival Analysis Models | Pending | `src/chrono_ltv/models/` *(stubs only)* |
 | 5 | MLflow Trainer + Evaluator | Pending | `src/chrono_ltv/training/` *(stubs only)* |
 | 6 | FastAPI Serving Layer | Pending | `src/chrono_ltv/serving/` *(stubs only)* |

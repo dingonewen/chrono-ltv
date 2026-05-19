@@ -48,6 +48,9 @@ serving = [
 validation = [
     "great-expectations>=1.0.0",
 ]
+features = [
+    "scikit-learn>=1.4.0",
+]
 monitoring = [
     "evidently>=0.4.30",
 ]
