@@ -37,6 +37,20 @@ from chrono_ltv.utils.io import save_parquet
 if TYPE_CHECKING:
     from typing import Any
 
+
+def _make_id(rng: np.random.Generator) -> str:
+    """Seeded UUID v4 replacement.
+
+    uuid.uuid4() draws from os.urandom() and cannot be seeded, which breaks
+    reproducibility tests.  This function generates a RFC-4122-compliant v4
+    UUID whose randomness comes entirely from the project RNG.
+    """
+    b = bytearray(rng.integers(0, 256, size=16, dtype=np.uint8).tobytes())
+    b[6] = (b[6] & 0x0F) | 0x40  # version 4
+    b[8] = (b[8] & 0x3F) | 0x80  # variant
+    return str(uuid.UUID(bytes=bytes(b)))
+
+
 # ---------------------------------------------------------------------------
 # Configuration dataclass (mirrors conf/data/simulator.yaml)
 # ---------------------------------------------------------------------------
@@ -133,7 +147,7 @@ class _CustomerFactory:
             reg_date = self._cfg.start_dt + timedelta(days=int(reg_offset))
             records.append(
                 {
-                    "customer_id": str(uuid.uuid4()),
+                    "customer_id": _make_id(self._rng),
                     "first_name": self._fake.first_name(),
                     "last_name": self._fake.last_name(),
                     "email": self._fake.email(),
@@ -186,7 +200,7 @@ class _TransactionFactory:
                 order_value = float(self._rng.lognormal(mean=4.2, sigma=0.8))
                 rows.append(
                     {
-                        "transaction_id": str(uuid.uuid4()),
+                        "transaction_id": _make_id(self._rng),
                         "customer_id": cust["customer_id"],
                         "event_timestamp": event_dt,
                         "order_value": round(order_value, 2),
@@ -234,7 +248,7 @@ class _ClickstreamFactory:
         for _, txn in transactions.iterrows():
             # Each transaction generates 3-15 page views in the session
             n_clicks = int(self._rng.integers(3, 16))
-            session_id = str(uuid.uuid4())
+            session_id = _make_id(self._rng)
             txn_dt: datetime = pd.Timestamp(txn["event_timestamp"]).to_pydatetime()
             device = self._rng.choice(self._DEVICES, p=self._DEVICE_WEIGHTS)
 
@@ -370,7 +384,7 @@ class _SupportTicketFactory:
                 resolved = bool(self._rng.binomial(1, 0.82))
                 rows.append(
                     {
-                        "ticket_id": str(uuid.uuid4()),
+                        "ticket_id": _make_id(self._rng),
                         "customer_id": cust["customer_id"],
                         "created_at": created_at,
                         "topic": topic,
@@ -395,7 +409,7 @@ class _SupportTicketFactory:
         templates = self._TEMPLATES.get(topic, ["I need help with my order."])
         template = random.choice(templates)  # noqa: S311  (non-cryptographic use)
         return template.format(
-            order_id=str(uuid.uuid4())[:8].upper(),
+            order_id=format(random.randint(0, 0xFFFFFFFF), "08X"),  # noqa: S311
             days=random.randint(1, 14),  # noqa: S311
             category=random.choice(categories),  # noqa: S311
             amount=round(random.uniform(10, 500), 2),  # noqa: S311

@@ -21,6 +21,7 @@ jobs:
 
       - name: Install dev dependencies
         run: pip install -e ".[dev]"
+        # Core deps are lightweight (no torch/mlflow/etc) — installs in ~30 s
 
       - name: Ruff lint
         run: ruff check src tests scripts
@@ -50,6 +51,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install -e ".[dev]"
+        # Installs core + dev extras only; ML/MLOps extras added in step-specific jobs
 
       - name: Run test suite
         run: |
