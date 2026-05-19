@@ -112,6 +112,16 @@ strict = true
 ignore_missing_imports = true
 exclude = ["notebooks/"]
 
+[[tool.mypy.overrides]]
+# FastAPI route decorators are untyped in some FastAPI / mypy version combos
+module = "chrono_ltv.serving.api"
+disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+# great-expectations stubs don't explicitly export expectation classes
+module = "chrono_ltv.data.validators"
+ignore_errors = true
+
 # ---------------------------------------------------------------------------
 # Pytest
 # ---------------------------------------------------------------------------
