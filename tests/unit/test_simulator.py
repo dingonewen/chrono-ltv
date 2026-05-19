@@ -12,6 +12,7 @@ Test categories
 from __future__ import annotations
 
 import uuid
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -296,3 +297,44 @@ class TestReproducibility:
         d2 = self._run_sim(99)
         # Customer emails should differ
         assert not d1["customers"]["email"].equals(d2["customers"]["email"])
+
+
+# ===========================================================================
+# 6. Persistence Tests
+# ===========================================================================
+
+
+class TestPersistence:
+    def test_persist_writes_all_parquet_files(self, tmp_path: Path) -> None:
+        cfg = SimulatorConfig(
+            n_customers=30,
+            start_date="2023-01-01",
+            end_date="2023-06-30",
+            random_seed=7,
+            noise=NoiseConfig(missing_rate=0, duplicate_rate=0),
+            output_dir=tmp_path,
+        )
+        EcommerceSimulator(cfg).run(persist=True)
+
+        expected_files = {
+            "customers.parquet",
+            "transactions.parquet",
+            "clickstream.parquet",
+            "support_tickets.parquet",
+            "survival_labels.parquet",
+        }
+        written = {p.name for p in tmp_path.iterdir()}
+        assert expected_files == written
+
+    def test_persisted_customers_roundtrip(self, tmp_path: Path) -> None:
+        cfg = SimulatorConfig(
+            n_customers=30,
+            start_date="2023-01-01",
+            end_date="2023-06-30",
+            random_seed=7,
+            noise=NoiseConfig(missing_rate=0, duplicate_rate=0),
+            output_dir=tmp_path,
+        )
+        datasets = EcommerceSimulator(cfg).run(persist=True)
+        loaded = pd.read_parquet(tmp_path / "customers.parquet")
+        assert len(loaded) == len(datasets["customers"])
