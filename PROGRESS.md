@@ -47,7 +47,7 @@ It is multimodal: tabular transaction data + clickstream sessions + LLM-embedded
 | 3 | Feature Engineering Pipeline | **Done ✓** | [pipeline.py](src/chrono_ltv/features/pipeline.py), [encoders.py](src/chrono_ltv/features/encoders.py) |
 | 4 | Survival Analysis Models | **Done ✓** | [base.py](src/chrono_ltv/models/base.py), [cox_ph.py](src/chrono_ltv/models/cox_ph.py), [xgb_survival.py](src/chrono_ltv/models/xgb_survival.py), [deepsurv.py](src/chrono_ltv/models/deepsurv.py) |
 | 5 | MLflow Trainer + Evaluator | **Done ✓** | [trainer.py](src/chrono_ltv/training/trainer.py), [evaluator.py](src/chrono_ltv/training/evaluator.py) |
-| 6 | FastAPI Serving Layer | Pending | `src/chrono_ltv/serving/` *(stubs only)* |
+| 6 | FastAPI Serving Layer | **Done ✓** | [api.py](src/chrono_ltv/serving/api.py), [predictor.py](src/chrono_ltv/serving/predictor.py), [schemas.py](src/chrono_ltv/serving/schemas.py) |
 | 7 | Evidently Drift Monitor | Pending | `src/chrono_ltv/monitoring/` *(stubs only)* |
 | 8 | Behavioral / Invariance Tests | Pending | `tests/behavioral/` *(stubs only)* |
 
@@ -110,13 +110,13 @@ Every file that exists and what it does.
 | `trainer.py` | MLflow-integrated training loop with k-fold CV |
 | `evaluator.py` | Concordance index, time-dependent AUC, Brier score |
 
-#### `serving/` — Step 6 (Pending)
+#### `serving/` — Step 6 (Done ✓)
 
-| File | What it will contain |
-|------|---------------------|
-| `api.py` | FastAPI app with `/predict`, `/health`, `/metrics` endpoints |
-| `predictor.py` | MLflow model loader + inference wrapper |
-| `schemas.py` | Pydantic request/response models for the API |
+| File | What it contains |
+|------|-----------------|
+| [api.py](src/chrono_ltv/serving/api.py) | `create_app()` factory + `lifespan` + `/predict`, `/health`, `/metrics` endpoints; `app` module instance for `make serve` |
+| [predictor.py](src/chrono_ltv/serving/predictor.py) | `ModelPredictor`: lazy MLflow load, single-row `predict()` → `PredictionOutput`; `_model` injectable for testing |
+| [schemas.py](src/chrono_ltv/serving/schemas.py) | `PredictRequest`, `PredictResponse`, `SurvivalCurve`, `HealthResponse`, `MetricsResponse` |
 
 #### `monitoring/` — Step 7 (Pending)
 
@@ -150,6 +150,7 @@ Every file that exists and what it does.
 | [tests/unit/test_io.py](tests/unit/test_io.py) | 6 tests: save/load roundtrip, overwrite guard, missing-file error |
 | `tests/unit/test_validators.py` | *(Step 2 — this session)* |
 | `tests/integration/` | *(Steps 5–6 — not yet written)* |
+| [tests/unit/test_serving.py](tests/unit/test_serving.py) | 30 tests: ModelPredictor unit tests (no MLflow), /health, /metrics, /predict endpoint tests via TestClient |
 | `tests/behavioral/` | *(Step 8 — not yet written)* Invariance + directional model tests |
 
 ### Docker
@@ -234,4 +235,6 @@ Known-resolved issues (do not re-introduce):
 - `survival` extras group (`scikit-survival`, `xgboost`) installed in CI; `torch` is not (too large) — DeepSurv tests are skipped in CI and run locally only
 - MLflow tracking URIs on Windows: never use `file://` or bare `C:\...` paths — use `sqlite:///path/to/mlflow.db` in tests
 - `cumulative_dynamic_auc` raises `ValueError` on small CV folds when the censoring survival function hits zero — caught and treated as empty `td_auc` dict
+- FastAPI lifespan checks `hasattr(app.state, "predictor")` before loading — tests pre-set the predictor on `app.state` to bypass MLflow; `_model` can also be injected directly on `ModelPredictor` for unit tests
+- `AsyncGenerator` from `collections.abc` triggers ruff TC003 in `api.py` — move to `TYPE_CHECKING` block (safe because `from __future__ import annotations` makes the return annotation a string at runtime)
 - `loguru.Logger` may not be importable at runtime on older loguru installs — annotate `get_logger` return as `Any` and guard `from loguru import Logger` under `TYPE_CHECKING`

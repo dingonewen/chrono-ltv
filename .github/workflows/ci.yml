@@ -51,7 +51,7 @@ jobs:
           cache-dependency-path: "**/pyproject.toml"
 
       - name: Install dependencies
-        run: pip install --prefer-binary -e ".[dev,validation,features,survival]"
+        run: pip install --prefer-binary -e ".[dev,validation,features,survival,serving]"
         # core + dev + GE + sklearn + sksurv/xgboost; torch/sentence-transformers skipped (too large for CI)
 
       - name: Run test suite

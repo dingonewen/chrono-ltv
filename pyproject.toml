@@ -127,7 +127,6 @@ omit = [
     "src/chrono_ltv/features/*",
     "src/chrono_ltv/models/*",
     "src/chrono_ltv/training/*",
-    "src/chrono_ltv/serving/*",
     "src/chrono_ltv/monitoring/*",
 ]
 
