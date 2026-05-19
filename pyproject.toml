@@ -58,6 +58,10 @@ survival = [
 monitoring = [
     "evidently>=0.7.0",
 ]
+dashboard = [
+    "streamlit>=1.35.0",
+    "matplotlib>=3.9.0",
+]
 # dev: test + lint tools only — no heavy ML deps
 dev = [
     "pytest>=8.2.0",
@@ -70,7 +74,7 @@ dev = [
     "ipykernel>=6.29.0",
 ]
 # Convenience: install every optional group at once (local dev / Docker)
-all = ["chrono-ltv[ml,mlops,serving,validation,monitoring]"]
+all = ["chrono-ltv[ml,mlops,serving,validation,monitoring,dashboard]"]
 
 [project.scripts]
 chrono-simulate = "scripts.generate_data:app"

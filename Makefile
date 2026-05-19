@@ -61,6 +61,9 @@ train:
 serve:
 	uvicorn src.chrono_ltv.serving.api:app --host 0.0.0.0 --port 8000 --reload
 
+dashboard:
+	streamlit run src/chrono_ltv/dashboard.py
+
 monitor:
 	$(PYTHON) $(SCRIPTS)/monitor.py
 
