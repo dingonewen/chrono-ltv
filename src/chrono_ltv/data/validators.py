@@ -246,8 +246,8 @@ class DataValidator:
             if not r.success:
                 cfg = r.expectation_config
                 # .type in GX 1.x; .expectation_type in 0.18.x
-                exp_type: str = getattr(cfg, "type", None) or getattr(
-                    cfg, "expectation_type", "unknown"
+                exp_type: str = str(
+                    getattr(cfg, "type", None) or getattr(cfg, "expectation_type", "unknown")
                 )
                 kwargs: dict[str, Any] = getattr(cfg, "kwargs", {}) or {}
                 col = kwargs.get("column", "?")
