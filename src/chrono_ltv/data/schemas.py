@@ -5,8 +5,6 @@ These schemas serve a dual purpose:
   2. Auto-generated OpenAPI documentation for the serving layer.
 """
 
-from __future__ import annotations
-
 from datetime import datetime
 from typing import Literal
 from uuid import UUID

@@ -25,7 +25,10 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -205,7 +208,7 @@ class _ClickstreamFactory:
             txn_dt: datetime = pd.Timestamp(txn["event_timestamp"]).to_pydatetime()
             device = self._rng.choice(self._DEVICES, p=self._DEVICE_WEIGHTS)
 
-            for click_idx in range(n_clicks):
+            for _ in range(n_clicks):
                 page = self._rng.choice(self._PAGE_TYPES, p=self._PAGE_WEIGHTS)
                 time_offset = timedelta(seconds=int(self._rng.integers(0, 3600)))
                 rows.append({
@@ -435,7 +438,7 @@ class _NoiseInjector:
     def __init__(self, cfg: NoiseConfig, rng: np.random.Generator) -> None:
         self._cfg = cfg
         self._rng = rng
-        self.fault_report: dict[str, int] = {}
+        self.fault_report: dict[str, dict[str, int]] = {}
 
     def inject(self, df: pd.DataFrame, dataset_name: str) -> pd.DataFrame:
         """Apply all configured noise types and return the mutated DataFrame."""
@@ -468,11 +471,14 @@ class _NoiseInjector:
         if self._cfg.missing_rate <= 0:
             return df, 0
         # Only target nullable columns (skip IDs and dates)
+        skip_cols = {
+            "customer_id", "transaction_id", "session_id",
+            "ticket_id", "event_timestamp", "registration_date",
+        }
         nullable_cols = [
             c for c in df.columns
-            if c not in {"customer_id", "transaction_id", "session_id",
-                         "ticket_id", "event_timestamp", "registration_date"}
-            and df[c].dtype == object or df[c].dtype in [np.float64, np.int64]
+            if c not in skip_cols
+            and (df[c].dtype == object or df[c].dtype in (np.float64, np.int64))
         ]
         if not nullable_cols:
             return df, 0
@@ -611,7 +617,7 @@ class EcommerceSimulator:
         self._log_summary(datasets)
         return datasets
 
-    def fault_report(self) -> dict[str, Any]:
+    def fault_report(self) -> dict[str, dict[str, int]]:
         """Return the noise-injection fault report from the last ``run()``."""
         return self._noise_injector.fault_report
 

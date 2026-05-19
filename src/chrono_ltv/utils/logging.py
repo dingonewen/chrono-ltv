@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from loguru import logger
+from loguru import Logger, logger
 
 
 def configure_logging(
@@ -51,6 +51,6 @@ def configure_logging(
         )
 
 
-def get_logger(name: str):  # type: ignore[no-untyped-def]
+def get_logger(name: str) -> Logger:
     """Return a child logger bound to *name* (module path)."""
     return logger.bind(name=name)
