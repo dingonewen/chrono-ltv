@@ -311,7 +311,7 @@ class _SupportTicketFactory:
 
         cust_to_txns = transactions.groupby("customer_id")
 
-        for (_, cust), n_tickets in zip(customers.iterrows(), n_tickets_per_customer):
+        for (_, cust), n_tickets in zip(customers.iterrows(), n_tickets_per_customer, strict=True):
             if n_tickets == 0:
                 continue
             cust_txns = cust_to_txns.get_group(cust["customer_id"]) if cust["customer_id"] in cust_to_txns.groups else None
@@ -485,7 +485,7 @@ class _NoiseInjector:
         n_cells = int(n * len(nullable_cols) * self._cfg.missing_rate)
         rows = self._rng.integers(0, n, size=n_cells)
         cols = self._rng.choice(nullable_cols, size=n_cells)
-        for r, c in zip(rows, cols):
+        for r, c in zip(rows, cols, strict=True):
             df.at[df.index[r], c] = np.nan
         return df, n_cells
 
@@ -507,7 +507,7 @@ class _NoiseInjector:
         n_outliers = max(1, int(n * self._cfg.outlier_rate))
         rows = self._rng.integers(0, n, size=n_outliers)
         cols = self._rng.choice(numeric_cols, size=n_outliers)
-        for r, c in zip(rows, cols):
+        for r, c in zip(rows, cols, strict=True):
             col_max = df[c].max()
             df.at[df.index[r], c] = col_max * self._rng.uniform(10, 100)
         return df, n_outliers

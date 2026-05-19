@@ -80,6 +80,10 @@ src = ["src", "tests", "scripts"]
 select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM", "TCH"]
 ignore = ["E501"]  # line-length handled by formatter
 
+[tool.ruff.lint.flake8-bugbear]
+# typer.Option / typer.Argument are designed to appear in function-argument defaults
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
 [tool.ruff.lint.flake8-type-checking]
 # Pydantic evaluates field annotations at runtime even with PEP 563 deferred eval
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]
