@@ -56,7 +56,7 @@ survival = [
     "xgboost>=2.0.0",
 ]
 monitoring = [
-    "evidently>=0.4.30",
+    "evidently>=0.7.0",
 ]
 # dev: test + lint tools only — no heavy ML deps
 dev = [
@@ -127,7 +127,6 @@ omit = [
     "src/chrono_ltv/features/*",
     "src/chrono_ltv/models/*",
     "src/chrono_ltv/training/*",
-    "src/chrono_ltv/monitoring/*",
 ]
 
 [tool.coverage.report]

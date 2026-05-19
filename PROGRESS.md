@@ -48,7 +48,7 @@ It is multimodal: tabular transaction data + clickstream sessions + LLM-embedded
 | 4 | Survival Analysis Models | **Done ✓** | [base.py](src/chrono_ltv/models/base.py), [cox_ph.py](src/chrono_ltv/models/cox_ph.py), [xgb_survival.py](src/chrono_ltv/models/xgb_survival.py), [deepsurv.py](src/chrono_ltv/models/deepsurv.py) |
 | 5 | MLflow Trainer + Evaluator | **Done ✓** | [trainer.py](src/chrono_ltv/training/trainer.py), [evaluator.py](src/chrono_ltv/training/evaluator.py) |
 | 6 | FastAPI Serving Layer | **Done ✓** | [api.py](src/chrono_ltv/serving/api.py), [predictor.py](src/chrono_ltv/serving/predictor.py), [schemas.py](src/chrono_ltv/serving/schemas.py) |
-| 7 | Evidently Drift Monitor | Pending | `src/chrono_ltv/monitoring/` *(stubs only)* |
+| 7 | Evidently Drift Monitor | **Done ✓** | [drift.py](src/chrono_ltv/monitoring/drift.py), [alerts.py](src/chrono_ltv/monitoring/alerts.py), [scripts/monitor.py](scripts/monitor.py) |
 | 8 | Behavioral / Invariance Tests | Pending | `tests/behavioral/` *(stubs only)* |
 
 ---
@@ -118,12 +118,12 @@ Every file that exists and what it does.
 | [predictor.py](src/chrono_ltv/serving/predictor.py) | `ModelPredictor`: lazy MLflow load, single-row `predict()` → `PredictionOutput`; `_model` injectable for testing |
 | [schemas.py](src/chrono_ltv/serving/schemas.py) | `PredictRequest`, `PredictResponse`, `SurvivalCurve`, `HealthResponse`, `MetricsResponse` |
 
-#### `monitoring/` — Step 7 (Pending)
+#### `monitoring/` — Step 7 (Done ✓)
 
-| File | What it will contain |
-|------|---------------------|
-| `drift.py` | Evidently `DataDriftPreset` + `DataQualityPreset` reports |
-| `alerts.py` | PSI threshold checks, alert routing |
+| File | What it contains |
+|------|-----------------|
+| [drift.py](src/chrono_ltv/monitoring/drift.py) | `DriftMonitor` wrapping Evidently 0.7 `Report([DataDriftPreset(...)])`. Returns `DriftReport` + `FeatureDriftStat` dataclasses; `_is_drifted` routes p-value vs distance-based tests. |
+| [alerts.py](src/chrono_ltv/monitoring/alerts.py) | `DriftAlerter.check()` → `list[DriftAlert]`; PSI severity tiers (warning ≥ 0.1, critical ≥ 0.2); `summarise()` for log output |
 
 #### `utils/` — Done
 
@@ -138,7 +138,7 @@ Every file that exists and what it does.
 |------|---------|
 | [scripts/generate_data.py](scripts/generate_data.py) | `python scripts/generate_data.py [--n-customers N ...]` or `make simulate` |
 | `scripts/train.py` | *(Step 5 — not yet written)* |
-| `scripts/monitor.py` | *(Step 7 — not yet written)* |
+| [scripts/monitor.py](scripts/monitor.py) | `python scripts/monitor.py REFERENCE CURRENT [OPTIONS]` or `make monitor` |
 
 ### Tests (`tests/`)
 
@@ -151,6 +151,7 @@ Every file that exists and what it does.
 | `tests/unit/test_validators.py` | *(Step 2 — this session)* |
 | `tests/integration/` | *(Steps 5–6 — not yet written)* |
 | [tests/unit/test_serving.py](tests/unit/test_serving.py) | 30 tests: ModelPredictor unit tests (no MLflow), /health, /metrics, /predict endpoint tests via TestClient |
+| [tests/unit/test_monitoring.py](tests/unit/test_monitoring.py) | 33 tests: `_is_drifted` helper, `DriftMonitor` (stable/drifted pairs, PSI method, HTML/JSON output), `DriftAlerter` (severity tiers, sorting, summarise) |
 | `tests/behavioral/` | *(Step 8 — not yet written)* Invariance + directional model tests |
 
 ### Docker
@@ -235,6 +236,9 @@ Known-resolved issues (do not re-introduce):
 - `survival` extras group (`scikit-survival`, `xgboost`) installed in CI; `torch` is not (too large) — DeepSurv tests are skipped in CI and run locally only
 - MLflow tracking URIs on Windows: never use `file://` or bare `C:\...` paths — use `sqlite:///path/to/mlflow.db` in tests
 - `cumulative_dynamic_auc` raises `ValueError` on small CV folds when the censoring survival function hits zero — caught and treated as empty `td_auc` dict
+- Evidently 0.7.x has a completely new API — `evidently.report.Report` no longer exists; use `from evidently import Report` + `from evidently.presets import DataDriftPreset`. The `Report.run()` returns a `Snapshot`. Constraint updated to `evidently>=0.7.0`
+- Evidently `DataDriftPreset` snapshot dict: `metrics[0]` is always `DriftedColumnsCount`, `metrics[1:]` are `ValueDrift` per column. PSI/distance methods: drift if value > threshold. p-value methods: drift if value < threshold.
+- `scripts/monitor.py` must NOT use `from __future__ import annotations` — Typer inspects `Path` annotations at runtime (same rule as generate_data.py)
 - FastAPI lifespan checks `hasattr(app.state, "predictor")` before loading — tests pre-set the predictor on `app.state` to bypass MLflow; `_model` can also be injected directly on `ModelPredictor` for unit tests
 - `AsyncGenerator` from `collections.abc` triggers ruff TC003 in `api.py` — move to `TYPE_CHECKING` block (safe because `from __future__ import annotations` makes the return annotation a string at runtime)
 - `loguru.Logger` may not be importable at runtime on older loguru installs — annotate `get_logger` return as `Any` and guard `from loguru import Logger` under `TYPE_CHECKING`
