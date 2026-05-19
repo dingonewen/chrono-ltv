@@ -12,7 +12,6 @@ Test categories
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -22,8 +21,6 @@ from chrono_ltv.data.simulator import (
     EcommerceSimulator,
     NoiseConfig,
     SimulatorConfig,
-    _NoiseInjector,
-    _SurvivalLabelBuilder,
 )
 
 # ===========================================================================

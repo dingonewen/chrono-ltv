@@ -27,15 +27,15 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from typing import Any
-
 import numpy as np
 import pandas as pd
 from faker import Faker
 from loguru import logger
 
 from chrono_ltv.utils.io import save_parquet
+
+if TYPE_CHECKING:
+    from typing import Any
 
 # ---------------------------------------------------------------------------
 # Configuration dataclass (mirrors conf/data/simulator.yaml)
