@@ -1,0 +1,57 @@
+# @package _global_.data
+
+simulator:
+  n_customers: 10_000
+  start_date: "2022-01-01"
+  end_date: "2024-12-31"
+  random_seed: 42
+
+  # Churn definition: no purchase within this many days
+  churn_threshold_days: 90
+
+  # Noise injection rates (0.0 – 1.0)
+  noise:
+    missing_rate: 0.04          # 4 % of fields set to NaN
+    duplicate_rate: 0.01        # 1 % of rows duplicated
+    outlier_rate: 0.02          # 2 % of numeric values perturbed to extremes
+    future_date_rate: 0.005     # 0.5 % of timestamps set to the future
+    negative_amount_rate: 0.005 # 0.5 % of order amounts negated
+
+  # Product catalogue (used for sampling)
+  product_categories:
+    - Electronics
+    - Clothing
+    - Home & Garden
+    - Beauty
+    - Sports
+    - Books
+    - Food & Beverage
+    - Toys
+
+  # Acquisition channels and their relative weights
+  acquisition_channels:
+    organic_search: 0.30
+    paid_search:    0.20
+    social_media:   0.18
+    email:          0.12
+    referral:       0.10
+    direct:         0.10
+
+  # Support ticket topics
+  support_topics:
+    - "delayed shipping"
+    - "wrong item delivered"
+    - "refund request"
+    - "product defect"
+    - "account access issue"
+    - "billing discrepancy"
+    - "product inquiry"
+    - "general feedback"
+
+  # Output
+  output:
+    customers_file: customers.parquet
+    transactions_file: transactions.parquet
+    clickstream_file: clickstream.parquet
+    support_tickets_file: support_tickets.parquet
+    survival_labels_file: survival_labels.parquet

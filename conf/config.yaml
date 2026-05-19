@@ -1,0 +1,20 @@
+# Root Hydra config — compose defaults from sub-configs
+defaults:
+  - data: simulator
+  - model: cox_ph
+  - mlflow: tracking
+  - serving: api
+  - _self_
+
+project:
+  name: chrono-ltv
+  version: "0.1.0"
+  random_seed: 42
+
+paths:
+  data_raw: data/raw
+  data_processed: data/processed
+  data_reference: data/reference
+  expectations: data/expectations
+  reports: reports
+  artifacts: artifacts

@@ -1,0 +1,22 @@
+# @package _global_.mlflow
+
+tracking_uri: "http://localhost:5000"
+experiment_name: "chrono-ltv-survival"
+run_tags:
+  project: "chrono-ltv"
+  team: "mle"
+  env: "development"
+
+artifact_location: "artifacts/mlflow"
+
+# Model Registry
+registry:
+  model_name: "chrono-ltv-cox"
+  staging_alias: "Staging"
+  production_alias: "Production"
+
+# Auto-log settings
+autolog:
+  log_models: true
+  log_input_examples: true
+  log_model_signatures: true
