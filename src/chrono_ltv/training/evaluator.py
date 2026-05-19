@@ -105,12 +105,8 @@ class SurvivalEvaluator:
         td_auc_dict: dict[int, float] = {}
         if len(valid_times) >= 2:
             try:
-                auc_vals, _ = cumulative_dynamic_auc(
-                    y_train, y_test, risk_scores, valid_times
-                )
-                td_auc_dict = {
-                    int(t): float(v) for t, v in zip(valid_times, auc_vals, strict=True)
-                }
+                auc_vals, _ = cumulative_dynamic_auc(y_train, y_test, risk_scores, valid_times)
+                td_auc_dict = {int(t): float(v) for t, v in zip(valid_times, auc_vals, strict=True)}
             except ValueError:
                 pass
 
