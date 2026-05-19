@@ -51,6 +51,10 @@ validation = [
 features = [
     "scikit-learn>=1.4.0",
 ]
+survival = [
+    "scikit-survival>=0.22.0",
+    "xgboost>=2.0.0",
+]
 monitoring = [
     "evidently>=0.4.30",
 ]

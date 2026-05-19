@@ -44,8 +44,8 @@ It is multimodal: tabular transaction data + clickstream sessions + LLM-embedded
 |------|--------|--------|-----------|
 | 1 | Data Stream Simulator | **Done ✓** | [simulator.py](src/chrono_ltv/data/simulator.py), [schemas.py](src/chrono_ltv/data/schemas.py) |
 | 2 | Great Expectations Validators | **Done ✓** | [validators.py](src/chrono_ltv/data/validators.py) |
-| 3 | Feature Engineering Pipeline | **In Progress** | `src/chrono_ltv/features/pipeline.py`, `encoders.py` *(this session)* |
-| 4 | Survival Analysis Models | Pending | `src/chrono_ltv/models/` *(stubs only)* |
+| 3 | Feature Engineering Pipeline | **Done ✓** | [pipeline.py](src/chrono_ltv/features/pipeline.py), [encoders.py](src/chrono_ltv/features/encoders.py) |
+| 4 | Survival Analysis Models | **Done ✓** | [base.py](src/chrono_ltv/models/base.py), [cox_ph.py](src/chrono_ltv/models/cox_ph.py), [xgb_survival.py](src/chrono_ltv/models/xgb_survival.py), [deepsurv.py](src/chrono_ltv/models/deepsurv.py) |
 | 5 | MLflow Trainer + Evaluator | Pending | `src/chrono_ltv/training/` *(stubs only)* |
 | 6 | FastAPI Serving Layer | Pending | `src/chrono_ltv/serving/` *(stubs only)* |
 | 7 | Evidently Drift Monitor | Pending | `src/chrono_ltv/monitoring/` *(stubs only)* |
@@ -229,3 +229,6 @@ Known-resolved issues (do not re-introduce):
 - `_inject_outliers`: always cast float outlier values to `int` when the target column dtype is `np.integer` — pandas 2.x raises `TypeError` on float-into-int64 assignment
 - `TCH` ruff rule is suppressed for `tests/*` — test files legitimately import stdlib outside `TYPE_CHECKING`
 - Coverage threshold is 65% (not 80%) — `utils/logging.py` is intentionally not tested in unit suite; empty stub packages are omitted from coverage
+- `np.row_stack` is deprecated in newer numpy — always use `np.vstack` for stacking survival function arrays
+- DeepSurv tests live in `tests/unit/test_deepsurv.py` (separate file) so that `pytest.importorskip("torch")` at module level does not skip the Cox/XGB tests in CI
+- `survival` extras group (`scikit-survival`, `xgboost`) installed in CI; `torch` is not (too large) — DeepSurv tests are skipped in CI and run locally only
