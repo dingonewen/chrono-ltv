@@ -50,8 +50,8 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -e ".[dev]"
-        # Installs core + dev extras only; ML/MLOps extras added in step-specific jobs
+        run: pip install -e ".[dev,validation]"
+        # core + dev + GE validation; heavy ML/MLOps extras added in step-specific jobs
 
       - name: Run test suite
         run: |

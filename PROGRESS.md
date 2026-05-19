@@ -42,8 +42,8 @@ It is multimodal: tabular transaction data + clickstream sessions + LLM-embedded
 
 | Step | Module | Status | Key Files |
 |------|--------|--------|-----------|
-| 1 | Data Stream Simulator | **Done** | [simulator.py](src/chrono_ltv/data/simulator.py), [schemas.py](src/chrono_ltv/data/schemas.py) |
-| 2 | Great Expectations Validators | **Next** | `src/chrono_ltv/data/validators.py` *(not yet written)* |
+| 1 | Data Stream Simulator | **Done ✓** | [simulator.py](src/chrono_ltv/data/simulator.py), [schemas.py](src/chrono_ltv/data/schemas.py) |
+| 2 | Great Expectations Validators | **In Progress** | `src/chrono_ltv/data/validators.py` *(this session)* |
 | 3 | Feature Engineering Pipeline | Pending | `src/chrono_ltv/features/pipeline.py` *(not yet written)* |
 | 4 | Survival Analysis Models | Pending | `src/chrono_ltv/models/` *(stubs only)* |
 | 5 | MLflow Trainer + Evaluator | Pending | `src/chrono_ltv/training/` *(stubs only)* |
@@ -79,13 +79,13 @@ Every file that exists and what it does.
 
 ### Source Code (`src/chrono_ltv/`)
 
-#### `data/` — Step 1 (Done)
+#### `data/` — Steps 1–2
 
 | File | What it contains |
 |------|-----------------|
 | [simulator.py](src/chrono_ltv/data/simulator.py) | `EcommerceSimulator` façade + 5 private factories: `_CustomerFactory`, `_TransactionFactory`, `_ClickstreamFactory`, `_SupportTicketFactory`, `_SurvivalLabelBuilder`, `_NoiseInjector`. Generates 5 Parquet datasets. |
 | [schemas.py](src/chrono_ltv/data/schemas.py) | Pydantic v2 models: `CustomerRecord`, `TransactionRecord`, `ClickstreamRecord`, `SupportTicketRecord`, `SurvivalLabel`. Used for row-level validation and OpenAPI docs. |
-| `validators.py` | *(Step 2 — not yet written)* Great Expectations suite |
+| `validators.py` | *(Step 2 — this session)* `DataValidator` + `ValidationSummary`: GX 1.x ephemeral suites for all 5 datasets |
 
 #### `features/` — Step 3 (Pending)
 
@@ -145,8 +145,10 @@ Every file that exists and what it does.
 | File | Coverage |
 |------|---------|
 | [tests/conftest.py](tests/conftest.py) | Session-scoped fixtures: `clean_datasets`, `noisy_datasets`, `clean_sim_cfg`, `noisy_sim_cfg` |
-| [tests/unit/test_simulator.py](tests/unit/test_simulator.py) | 25+ tests across 5 categories: schema, statistical, survival logic, noise injection, reproducibility |
-| `tests/unit/test_validators.py` | *(Step 2 — not yet written)* |
+| [tests/unit/test_simulator.py](tests/unit/test_simulator.py) | 33 tests: schema, statistical, survival logic, noise injection, reproducibility, persistence |
+| [tests/unit/test_schemas.py](tests/unit/test_schemas.py) | 20 tests: valid + invalid Pydantic instantiation for all 5 schemas |
+| [tests/unit/test_io.py](tests/unit/test_io.py) | 6 tests: save/load roundtrip, overwrite guard, missing-file error |
+| `tests/unit/test_validators.py` | *(Step 2 — this session)* |
 | `tests/integration/` | *(Steps 5–6 — not yet written)* |
 | `tests/behavioral/` | *(Step 8 — not yet written)* Invariance + directional model tests |
 
@@ -224,3 +226,6 @@ Known-resolved issues (do not re-introduce):
 - `if TYPE_CHECKING:` block must go **after** all regular imports
 - `from __future__ import annotations` must **not** be used in Pydantic model files
 - `_NoiseInjector` / `_SurvivalLabelBuilder` are internal; do not import them in tests unless directly constructing them
+- `_inject_outliers`: always cast float outlier values to `int` when the target column dtype is `np.integer` — pandas 2.x raises `TypeError` on float-into-int64 assignment
+- `TCH` ruff rule is suppressed for `tests/*` — test files legitimately import stdlib outside `TYPE_CHECKING`
+- Coverage threshold is 65% (not 80%) — `utils/logging.py` is intentionally not tested in unit suite; empty stub packages are omitted from coverage

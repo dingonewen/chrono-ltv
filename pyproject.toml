@@ -45,8 +45,10 @@ serving = [
     "fastapi>=0.111.0",
     "uvicorn[standard]>=0.29.0",
 ]
+validation = [
+    "great-expectations>=1.0.0",
+]
 monitoring = [
-    "great-expectations>=0.18.0",
     "evidently>=0.4.30",
 ]
 # dev: test + lint tools only — no heavy ML deps
@@ -61,7 +63,7 @@ dev = [
     "ipykernel>=6.29.0",
 ]
 # Convenience: install every optional group at once (local dev / Docker)
-all = ["chrono-ltv[ml,mlops,serving,monitoring]"]
+all = ["chrono-ltv[ml,mlops,serving,validation,monitoring]"]
 
 [project.scripts]
 chrono-simulate = "scripts.generate_data:app"
