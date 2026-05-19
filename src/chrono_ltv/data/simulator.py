@@ -560,7 +560,10 @@ class _NoiseInjector:
         cols = self._rng.choice(numeric_cols, size=n_outliers)
         for r, c in zip(rows, cols, strict=True):
             col_max = df[c].max()
-            df.at[df.index[r], c] = col_max * self._rng.uniform(10, 100)
+            raw: float = col_max * self._rng.uniform(10, 100)
+            # pandas 2.x refuses float assignment into int64 columns
+            value: int | float = int(round(raw)) if np.issubdtype(df[c].dtype, np.integer) else raw
+            df.at[df.index[r], c] = value
         return df, n_outliers
 
     def _inject_future_dates(self, df: pd.DataFrame, n: int) -> tuple[pd.DataFrame, int]:
