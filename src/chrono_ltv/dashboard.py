@@ -22,7 +22,6 @@ Requires
 
 from __future__ import annotations
 
-import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -118,7 +117,7 @@ def load_orders(seed: int, n_shopify: int, n_amazon: int) -> pd.DataFrame:
         c, u = _ts_pair(rng)
         shopify.append(
             ShopifyWebhookPayload(
-                checkout_id=f"CHK-{uuid.UUID(int=int(rng.integers(0, 2**128))).hex[:10]}",
+                checkout_id=f"CHK-{rng.integers(0, 0xFFFFFFFF):08x}{rng.integers(0, 0xFF):02x}",
                 order_id=f"SHP-{i:06d}",
                 customer_id=f"CUST-{rng.integers(1, max(2, n_shopify // 3)):04d}",
                 email=f"user{i}@example.com",
