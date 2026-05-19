@@ -49,7 +49,7 @@ It is multimodal: tabular transaction data + clickstream sessions + LLM-embedded
 | 5 | MLflow Trainer + Evaluator | **Done ✓** | [trainer.py](src/chrono_ltv/training/trainer.py), [evaluator.py](src/chrono_ltv/training/evaluator.py) |
 | 6 | FastAPI Serving Layer | **Done ✓** | [api.py](src/chrono_ltv/serving/api.py), [predictor.py](src/chrono_ltv/serving/predictor.py), [schemas.py](src/chrono_ltv/serving/schemas.py) |
 | 7 | Evidently Drift Monitor | **Done ✓** | [drift.py](src/chrono_ltv/monitoring/drift.py), [alerts.py](src/chrono_ltv/monitoring/alerts.py), [scripts/monitor.py](scripts/monitor.py) |
-| 8 | Behavioral / Invariance Tests | Pending | `tests/behavioral/` *(stubs only)* |
+| 8 | Behavioral / Invariance Tests | **Done ✓** | [tests/behavioral/](tests/behavioral/) |
 
 ---
 
@@ -152,7 +152,10 @@ Every file that exists and what it does.
 | `tests/integration/` | *(Steps 5–6 — not yet written)* |
 | [tests/unit/test_serving.py](tests/unit/test_serving.py) | 30 tests: ModelPredictor unit tests (no MLflow), /health, /metrics, /predict endpoint tests via TestClient |
 | [tests/unit/test_monitoring.py](tests/unit/test_monitoring.py) | 33 tests: `_is_drifted` helper, `DriftMonitor` (stable/drifted pairs, PSI method, HTML/JSON output), `DriftAlerter` (severity tiers, sorting, summarise) |
-| `tests/behavioral/` | *(Step 8 — not yet written)* Invariance + directional model tests |
+| [tests/behavioral/conftest.py](tests/behavioral/conftest.py) | Session fixtures: 500-customer simulation, `behavioral_feature_matrix`, `fitted_cox` |
+| [tests/behavioral/test_minimum_functionality.py](tests/behavioral/test_minimum_functionality.py) | 12 tests: finite scores, unit-interval S(t), monotone non-increasing, positive medians, C > 0.55 |
+| [tests/behavioral/test_invariance.py](tests/behavioral/test_invariance.py) | 7 tests: row-order invariance, identical-row invariance, determinism, single-row vs batch consistency |
+| [tests/behavioral/test_directional.py](tests/behavioral/test_directional.py) | 6 tests: churned > censored risk, Spearman correlation with duration, high-risk → short median, recency/frequency/monetary directional quartile tests |
 
 ### Docker
 
@@ -238,6 +241,8 @@ Known-resolved issues (do not re-introduce):
 - `cumulative_dynamic_auc` raises `ValueError` on small CV folds when the censoring survival function hits zero — caught and treated as empty `td_auc` dict
 - Evidently 0.7.x has a completely new API — `evidently.report.Report` no longer exists; use `from evidently import Report` + `from evidently.presets import DataDriftPreset`. The `Report.run()` returns a `Snapshot`. Constraint updated to `evidently>=0.7.0`
 - Evidently `DataDriftPreset` snapshot dict: `metrics[0]` is always `DriftedColumnsCount`, `metrics[1:]` are `ValueDrift` per column. PSI/distance methods: drift if value > threshold. p-value methods: drift if value < threshold.
+- Behavioral test `conftest.py` fixtures that call library functions returning `Any` must use `# type: ignore[no-any-return]`, not `[return-value]`
+- Behavioral `conftest.py` uses a dedicated 500-customer simulation (separate from the 200-customer unit-test fixture) to give the Cox model enough signal for directional assertions
 - `scripts/monitor.py` must NOT use `from __future__ import annotations` — Typer inspects `Path` annotations at runtime (same rule as generate_data.py)
 - FastAPI lifespan checks `hasattr(app.state, "predictor")` before loading — tests pre-set the predictor on `app.state` to bypass MLflow; `_model` can also be injected directly on `ModelPredictor` for unit tests
 - `AsyncGenerator` from `collections.abc` triggers ruff TC003 in `api.py` — move to `TYPE_CHECKING` block (safe because `from __future__ import annotations` makes the return annotation a string at runtime)
