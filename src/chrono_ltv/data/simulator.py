@@ -62,19 +62,40 @@ class SimulatorConfig:
     output_dir: Path = Path("data/raw")
 
     # Catalogue
-    product_categories: list[str] = field(default_factory=lambda: [
-        "Electronics", "Clothing", "Home & Garden", "Beauty",
-        "Sports", "Books", "Food & Beverage", "Toys",
-    ])
-    acquisition_channels: dict[str, float] = field(default_factory=lambda: {
-        "organic_search": 0.30, "paid_search": 0.20, "social_media": 0.18,
-        "email": 0.12, "referral": 0.10, "direct": 0.10,
-    })
-    support_topics: list[str] = field(default_factory=lambda: [
-        "delayed shipping", "wrong item delivered", "refund request",
-        "product defect", "account access issue", "billing discrepancy",
-        "product inquiry", "general feedback",
-    ])
+    product_categories: list[str] = field(
+        default_factory=lambda: [
+            "Electronics",
+            "Clothing",
+            "Home & Garden",
+            "Beauty",
+            "Sports",
+            "Books",
+            "Food & Beverage",
+            "Toys",
+        ]
+    )
+    acquisition_channels: dict[str, float] = field(
+        default_factory=lambda: {
+            "organic_search": 0.30,
+            "paid_search": 0.20,
+            "social_media": 0.18,
+            "email": 0.12,
+            "referral": 0.10,
+            "direct": 0.10,
+        }
+    )
+    support_topics: list[str] = field(
+        default_factory=lambda: [
+            "delayed shipping",
+            "wrong item delivered",
+            "refund request",
+            "product defect",
+            "account access issue",
+            "billing discrepancy",
+            "product inquiry",
+            "general feedback",
+        ]
+    )
 
     def __post_init__(self) -> None:
         self.start_dt = datetime.fromisoformat(self.start_date)
@@ -110,20 +131,20 @@ class _CustomerFactory:
         for _ in range(self._cfg.n_customers):
             reg_offset = self._rng.integers(0, self._cfg.observation_days - 1)
             reg_date = self._cfg.start_dt + timedelta(days=int(reg_offset))
-            records.append({
-                "customer_id": str(uuid.uuid4()),
-                "first_name": self._fake.first_name(),
-                "last_name": self._fake.last_name(),
-                "email": self._fake.email(),
-                "country": self._fake.country_code(representation="alpha-2"),
-                "acquisition_channel": self._rng.choice(channels, p=weights),
-                "registration_date": reg_date,
-                "age": int(self._rng.integers(18, 80)),
-                "gender": self._rng.choice(self._GENDERS, p=self._GENDER_WEIGHTS),
-                "loyalty_tier": self._rng.choice(
-                    self._LOYALTY_TIERS, p=self._TIER_WEIGHTS
-                ),
-            })
+            records.append(
+                {
+                    "customer_id": str(uuid.uuid4()),
+                    "first_name": self._fake.first_name(),
+                    "last_name": self._fake.last_name(),
+                    "email": self._fake.email(),
+                    "country": self._fake.country_code(representation="alpha-2"),
+                    "acquisition_channel": self._rng.choice(channels, p=weights),
+                    "registration_date": reg_date,
+                    "age": int(self._rng.integers(18, 80)),
+                    "gender": self._rng.choice(self._GENDERS, p=self._GENDER_WEIGHTS),
+                    "loyalty_tier": self._rng.choice(self._LOYALTY_TIERS, p=self._TIER_WEIGHTS),
+                }
+            )
         return pd.DataFrame(records)
 
 
@@ -133,7 +154,11 @@ class _TransactionFactory:
     """
 
     _PAYMENT_METHODS = [
-        "credit_card", "debit_card", "paypal", "crypto", "buy_now_pay_later",
+        "credit_card",
+        "debit_card",
+        "paypal",
+        "crypto",
+        "buy_now_pay_later",
     ]
     _PAYMENT_WEIGHTS = [0.40, 0.25, 0.20, 0.05, 0.10]
 
@@ -150,10 +175,7 @@ class _TransactionFactory:
             days_active = max(1, (self._cfg.end_dt - reg_date).days)
 
             # Negative-Binomial: mean=12 orders/year, overdispersion=0.4
-            n_orders = int(
-                self._rng.negative_binomial(n=5, p=0.30)
-                * (days_active / 365)
-            )
+            n_orders = int(self._rng.negative_binomial(n=5, p=0.30) * (days_active / 365))
             n_orders = max(1, n_orders)
 
             # Spread orders randomly over the active window
@@ -162,21 +184,23 @@ class _TransactionFactory:
                 event_dt = reg_date + timedelta(days=int(offset))
                 # Order value ~ log-normal (μ=4.2, σ=0.8) → median ≈ $67
                 order_value = float(self._rng.lognormal(mean=4.2, sigma=0.8))
-                rows.append({
-                    "transaction_id": str(uuid.uuid4()),
-                    "customer_id": cust["customer_id"],
-                    "event_timestamp": event_dt,
-                    "order_value": round(order_value, 2),
-                    "num_items": int(self._rng.integers(1, 8)),
-                    "product_category": self._rng.choice(self._cfg.product_categories),
-                    "payment_method": self._rng.choice(
-                        self._PAYMENT_METHODS, p=self._PAYMENT_WEIGHTS
-                    ),
-                    "is_returned": bool(self._rng.binomial(1, 0.08)),
-                    "discount_applied": round(
-                        float(self._rng.beta(1.5, 8.0)), 3
-                    ),  # right-skewed towards 0
-                })
+                rows.append(
+                    {
+                        "transaction_id": str(uuid.uuid4()),
+                        "customer_id": cust["customer_id"],
+                        "event_timestamp": event_dt,
+                        "order_value": round(order_value, 2),
+                        "num_items": int(self._rng.integers(1, 8)),
+                        "product_category": self._rng.choice(self._cfg.product_categories),
+                        "payment_method": self._rng.choice(
+                            self._PAYMENT_METHODS, p=self._PAYMENT_WEIGHTS
+                        ),
+                        "is_returned": bool(self._rng.binomial(1, 0.08)),
+                        "discount_applied": round(
+                            float(self._rng.beta(1.5, 8.0)), 3
+                        ),  # right-skewed towards 0
+                    }
+                )
 
         logger.info(f"Generated {len(rows):,} transaction records.")
         return pd.DataFrame(rows)
@@ -186,8 +210,14 @@ class _ClickstreamFactory:
     """Generates clickstream / session events correlated with transactions."""
 
     _PAGE_TYPES = [
-        "home", "category", "product", "cart",
-        "checkout", "confirmation", "search", "account",
+        "home",
+        "category",
+        "product",
+        "cart",
+        "checkout",
+        "confirmation",
+        "search",
+        "account",
     ]
     _PAGE_WEIGHTS = [0.15, 0.20, 0.30, 0.12, 0.08, 0.03, 0.10, 0.02]
     _DEVICES = ["desktop", "mobile", "tablet"]
@@ -211,24 +241,22 @@ class _ClickstreamFactory:
             for _ in range(n_clicks):
                 page = self._rng.choice(self._PAGE_TYPES, p=self._PAGE_WEIGHTS)
                 time_offset = timedelta(seconds=int(self._rng.integers(0, 3600)))
-                rows.append({
-                    "session_id": session_id,
-                    "customer_id": txn["customer_id"],
-                    "event_timestamp": txn_dt - timedelta(hours=1) + time_offset,
-                    "page_type": page,
-                    "time_on_page_seconds": round(
-                        float(self._rng.exponential(scale=90.0)), 1
-                    ),
-                    "device_type": device,
-                    "added_to_cart": bool(
-                        page == "product" and self._rng.binomial(1, 0.25)
-                    ),
-                    "search_query": (
-                        self._rng.choice(self._cfg.product_categories)
-                        if page == "search"
-                        else None
-                    ),
-                })
+                rows.append(
+                    {
+                        "session_id": session_id,
+                        "customer_id": txn["customer_id"],
+                        "event_timestamp": txn_dt - timedelta(hours=1) + time_offset,
+                        "page_type": page,
+                        "time_on_page_seconds": round(float(self._rng.exponential(scale=90.0)), 1),
+                        "device_type": device,
+                        "added_to_cart": bool(page == "product" and self._rng.binomial(1, 0.25)),
+                        "search_query": (
+                            self._rng.choice(self._cfg.product_categories)
+                            if page == "search"
+                            else None
+                        ),
+                    }
+                )
 
         logger.info(f"Generated {len(rows):,} clickstream records.")
         return pd.DataFrame(rows)
@@ -244,14 +272,14 @@ class _SupportTicketFactory:
 
     # Topic → sentiment bias (negative = dissatisfied customer)
     _TOPIC_SENTIMENT: dict[str, float] = {
-        "delayed shipping":       -0.6,
-        "wrong item delivered":   -0.7,
-        "refund request":         -0.5,
-        "product defect":         -0.8,
-        "account access issue":   -0.3,
-        "billing discrepancy":    -0.5,
-        "product inquiry":        +0.1,
-        "general feedback":       +0.2,
+        "delayed shipping": -0.6,
+        "wrong item delivered": -0.7,
+        "refund request": -0.5,
+        "product defect": -0.8,
+        "account access issue": -0.3,
+        "billing discrepancy": -0.5,
+        "product inquiry": +0.1,
+        "general feedback": +0.2,
     }
 
     # Template sentences per topic
@@ -314,13 +342,15 @@ class _SupportTicketFactory:
         for (_, cust), n_tickets in zip(customers.iterrows(), n_tickets_per_customer, strict=True):
             if n_tickets == 0:
                 continue
-            cust_txns = cust_to_txns.get_group(cust["customer_id"]) if cust["customer_id"] in cust_to_txns.groups else None
+            cust_txns = (
+                cust_to_txns.get_group(cust["customer_id"])
+                if cust["customer_id"] in cust_to_txns.groups
+                else None
+            )
             for _ in range(n_tickets):
                 topic = self._rng.choice(self._cfg.support_topics)
                 sentiment_base = self._TOPIC_SENTIMENT.get(topic, 0.0)
-                sentiment = float(
-                    np.clip(self._rng.normal(sentiment_base, 0.15), -1.0, 1.0)
-                )
+                sentiment = float(np.clip(self._rng.normal(sentiment_base, 0.15), -1.0, 1.0))
                 # Pick a random transaction to reference (if one exists)
                 ref_order = (
                     cust_txns.sample(1, random_state=int(self._rng.integers(0, 2**31))).iloc[0]
@@ -338,20 +368,20 @@ class _SupportTicketFactory:
                 created_at = base_dt + timedelta(days=int(self._rng.integers(1, 15)))
 
                 resolved = bool(self._rng.binomial(1, 0.82))
-                rows.append({
-                    "ticket_id": str(uuid.uuid4()),
-                    "customer_id": cust["customer_id"],
-                    "created_at": created_at,
-                    "topic": topic,
-                    "raw_text": raw_text,
-                    "sentiment_score": round(sentiment, 4),
-                    "resolved": resolved,
-                    "resolution_days": (
-                        round(float(self._rng.exponential(scale=3.0)), 1)
-                        if resolved
-                        else None
-                    ),
-                })
+                rows.append(
+                    {
+                        "ticket_id": str(uuid.uuid4()),
+                        "customer_id": cust["customer_id"],
+                        "created_at": created_at,
+                        "topic": topic,
+                        "raw_text": raw_text,
+                        "sentiment_score": round(sentiment, 4),
+                        "resolved": resolved,
+                        "resolution_days": (
+                            round(float(self._rng.exponential(scale=3.0)), 1) if resolved else None
+                        ),
+                    }
+                )
 
         logger.info(f"Generated {len(rows):,} support ticket records.")
         return pd.DataFrame(rows)
@@ -408,15 +438,17 @@ class _SurvivalLabelBuilder:
             end_point = churn_date if churned else self._cfg.end_dt
             duration = max(0.0, (end_point - first_purchase).days)
 
-            records.append({
-                "customer_id": row["customer_id"],
-                "first_purchase_date": first_purchase,
-                "last_purchase_date": last_purchase,
-                "duration_days": duration,
-                "event_observed": churned,
-                "total_orders": int(row["total_orders"]),
-                "total_revenue": round(float(row["total_revenue"]), 2),
-            })
+            records.append(
+                {
+                    "customer_id": row["customer_id"],
+                    "first_purchase_date": first_purchase,
+                    "last_purchase_date": last_purchase,
+                    "duration_days": duration,
+                    "event_observed": churned,
+                    "total_orders": int(row["total_orders"]),
+                    "total_revenue": round(float(row["total_revenue"]), 2),
+                }
+            )
 
         df = pd.DataFrame(records)
         churn_rate = df["event_observed"].mean()
@@ -472,11 +504,16 @@ class _NoiseInjector:
             return df, 0
         # Only target nullable columns (skip IDs and dates)
         skip_cols = {
-            "customer_id", "transaction_id", "session_id",
-            "ticket_id", "event_timestamp", "registration_date",
+            "customer_id",
+            "transaction_id",
+            "session_id",
+            "ticket_id",
+            "event_timestamp",
+            "registration_date",
         }
         nullable_cols = [
-            c for c in df.columns
+            c
+            for c in df.columns
             if c not in skip_cols
             and (df[c].dtype == object or df[c].dtype in (np.float64, np.int64))
         ]

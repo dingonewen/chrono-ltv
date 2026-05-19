@@ -31,9 +31,16 @@ from chrono_ltv.data.simulator import (
 class TestCustomerSchema:
     def test_required_columns(self, clean_datasets: dict) -> None:
         expected = {
-            "customer_id", "first_name", "last_name", "email",
-            "country", "acquisition_channel", "registration_date",
-            "age", "gender", "loyalty_tier",
+            "customer_id",
+            "first_name",
+            "last_name",
+            "email",
+            "country",
+            "acquisition_channel",
+            "registration_date",
+            "age",
+            "gender",
+            "loyalty_tier",
         }
         assert expected.issubset(clean_datasets["customers"].columns)
 
@@ -55,9 +62,15 @@ class TestCustomerSchema:
 class TestTransactionSchema:
     def test_required_columns(self, clean_datasets: dict) -> None:
         expected = {
-            "transaction_id", "customer_id", "event_timestamp",
-            "order_value", "num_items", "product_category",
-            "payment_method", "is_returned", "discount_applied",
+            "transaction_id",
+            "customer_id",
+            "event_timestamp",
+            "order_value",
+            "num_items",
+            "product_category",
+            "payment_method",
+            "is_returned",
+            "discount_applied",
         }
         assert expected.issubset(clean_datasets["transactions"].columns)
 
@@ -76,8 +89,13 @@ class TestTransactionSchema:
 class TestClickstreamSchema:
     def test_required_columns(self, clean_datasets: dict) -> None:
         expected = {
-            "session_id", "customer_id", "event_timestamp",
-            "page_type", "time_on_page_seconds", "device_type", "added_to_cart",
+            "session_id",
+            "customer_id",
+            "event_timestamp",
+            "page_type",
+            "time_on_page_seconds",
+            "device_type",
+            "added_to_cart",
         }
         assert expected.issubset(clean_datasets["clickstream"].columns)
 
@@ -85,8 +103,13 @@ class TestClickstreamSchema:
 class TestSupportTicketSchema:
     def test_required_columns(self, clean_datasets: dict) -> None:
         expected = {
-            "ticket_id", "customer_id", "created_at",
-            "topic", "raw_text", "sentiment_score", "resolved",
+            "ticket_id",
+            "customer_id",
+            "created_at",
+            "topic",
+            "raw_text",
+            "sentiment_score",
+            "resolved",
         }
         assert expected.issubset(clean_datasets["support_tickets"].columns)
 
@@ -94,8 +117,13 @@ class TestSupportTicketSchema:
 class TestSurvivalLabelSchema:
     def test_required_columns(self, clean_datasets: dict) -> None:
         expected = {
-            "customer_id", "first_purchase_date", "last_purchase_date",
-            "duration_days", "event_observed", "total_orders", "total_revenue",
+            "customer_id",
+            "first_purchase_date",
+            "last_purchase_date",
+            "duration_days",
+            "event_observed",
+            "total_orders",
+            "total_revenue",
         }
         assert expected.issubset(clean_datasets["survival_labels"].columns)
 
@@ -138,8 +166,14 @@ class TestStatisticalProperties:
 
     def test_page_type_values_are_valid(self, clean_datasets: dict) -> None:
         valid = {
-            "home", "category", "product", "cart",
-            "checkout", "confirmation", "search", "account",
+            "home",
+            "category",
+            "product",
+            "cart",
+            "checkout",
+            "confirmation",
+            "search",
+            "account",
         }
         unique_pages = set(clean_datasets["clickstream"]["page_type"].unique())
         assert unique_pages.issubset(valid)
@@ -175,8 +209,11 @@ class TestSurvivalLabels:
     def test_churned_customers_have_correct_duration(self) -> None:
         """Churned duration must equal (last_purchase − first_purchase) + threshold."""
         cfg = SimulatorConfig(
-            n_customers=50, start_date="2023-01-01", end_date="2023-12-31",
-            churn_threshold_days=90, random_seed=99,
+            n_customers=50,
+            start_date="2023-01-01",
+            end_date="2023-12-31",
+            churn_threshold_days=90,
+            random_seed=99,
             noise=NoiseConfig(missing_rate=0, duplicate_rate=0),
         )
         sim = EcommerceSimulator(cfg)
@@ -204,7 +241,9 @@ class TestNoiseInjection:
     def test_missing_values_exist_in_transactions(self, noisy_datasets: dict) -> None:
         assert noisy_datasets["transactions"].isna().any().any()
 
-    def test_duplicate_rows_exist(self, noisy_datasets: dict, noisy_sim_cfg: SimulatorConfig) -> None:
+    def test_duplicate_rows_exist(
+        self, noisy_datasets: dict, noisy_sim_cfg: SimulatorConfig
+    ) -> None:
         txns = noisy_datasets["transactions"]
         # With 5 % duplicate rate on IDs (plus added rows), total should exceed n_unique
         assert len(txns) > txns["transaction_id"].nunique()
@@ -234,8 +273,11 @@ class TestNoiseInjection:
 class TestReproducibility:
     def _run_sim(self, seed: int) -> dict:
         cfg = SimulatorConfig(
-            n_customers=100, start_date="2023-01-01", end_date="2023-12-31",
-            random_seed=seed, noise=NoiseConfig(missing_rate=0, duplicate_rate=0),
+            n_customers=100,
+            start_date="2023-01-01",
+            end_date="2023-12-31",
+            random_seed=seed,
+            noise=NoiseConfig(missing_rate=0, duplicate_rate=0),
         )
         return EcommerceSimulator(cfg).run(persist=False)
 

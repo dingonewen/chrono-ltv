@@ -29,9 +29,15 @@ def main(
     churn_threshold: int = typer.Option(90, help="Days of inactivity that define churn."),
     output_dir: Path = typer.Option(Path("data/raw"), help="Directory for output Parquet files."),
     seed: int = typer.Option(42, help="Global random seed for reproducibility."),
-    missing_rate: float = typer.Option(0.04, min=0.0, max=0.5, help="Rate of injected missing values."),
-    duplicate_rate: float = typer.Option(0.01, min=0.0, max=0.2, help="Rate of injected duplicate rows."),
-    no_noise: bool = typer.Option(False, "--no-noise", help="Disable all noise injection (clean data)."),
+    missing_rate: float = typer.Option(
+        0.04, min=0.0, max=0.5, help="Rate of injected missing values."
+    ),
+    duplicate_rate: float = typer.Option(
+        0.01, min=0.0, max=0.2, help="Rate of injected duplicate rows."
+    ),
+    no_noise: bool = typer.Option(
+        False, "--no-noise", help="Disable all noise injection (clean data)."
+    ),
     log_level: str = typer.Option("INFO", help="Logging verbosity."),
 ) -> None:
     """Generate synthetic e-commerce datasets for the ChronoLTV pipeline."""

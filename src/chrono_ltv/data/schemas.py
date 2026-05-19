@@ -21,8 +21,12 @@ class CustomerRecord(BaseModel):
     email: str
     country: str
     acquisition_channel: Literal[
-        "organic_search", "paid_search", "social_media",
-        "email", "referral", "direct",
+        "organic_search",
+        "paid_search",
+        "social_media",
+        "email",
+        "referral",
+        "direct",
     ]
     registration_date: datetime
     age: int | None = Field(default=None, ge=18, le=100)
@@ -47,6 +51,7 @@ class TransactionRecord(BaseModel):
     @classmethod
     def order_value_must_be_finite(cls, v: float) -> float:
         import math
+
         if not math.isfinite(v):
             raise ValueError("order_value must be finite")
         return v
@@ -59,8 +64,14 @@ class ClickstreamRecord(BaseModel):
     customer_id: UUID
     event_timestamp: datetime
     page_type: Literal[
-        "home", "category", "product", "cart",
-        "checkout", "confirmation", "search", "account",
+        "home",
+        "category",
+        "product",
+        "cart",
+        "checkout",
+        "confirmation",
+        "search",
+        "account",
     ]
     time_on_page_seconds: float = Field(ge=0.0)
     device_type: Literal["desktop", "mobile", "tablet"]
