@@ -78,7 +78,7 @@ _MOSH_RISK_COLORS = {
 # ── page config ───────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="MOSH ChronoLTV",
+    page_title="MOSH Synapse",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -183,7 +183,7 @@ st.markdown(
 # ── sidebar ───────────────────────────────────────────────────────────────────
 
 with st.sidebar:
-    st.title("MOSH ChronoLTV")
+    st.title("MOSH Synapse")
     st.caption("Omnichannel Revenue Intelligence & Member Retention Platform")
     st.divider()
 
