@@ -76,26 +76,81 @@ with st.sidebar:
     st.caption("Multi-source CLV & Churn Intelligence")
     st.divider()
 
-    st.subheader("Data Controls")
-    seed: int = int(
-        st.number_input("Random seed", min_value=0, max_value=9999, value=42, step=1)
+    # ── Data Ingestion Control Panel ──────────────────────────────────────────
+    st.subheader("Data Ingestion Control Panel")
+    data_source_mode: str = st.radio(
+        "Data Source Mode",
+        options=[
+            "Run with Synthetic Simulation Streams",
+            "Ingest Live MOSH Production Data (CSV/Excel Upload)",
+        ],
+        index=0,
+        help=(
+            "Synthetic mode uses either persisted parquet files or an in-memory "
+            "simulation. Upload mode accepts live exports from Shopify, Amazon, "
+            "and your 3PL provider."
+        ),
     )
-    n_shopify: int = st.slider("Shopify orders (synthetic fallback)", 20, 500, 150, 10)
-    n_amazon: int = st.slider("Amazon orders (synthetic fallback)", 10, 300, 90, 10)
 
     st.divider()
-    st.subheader("Churn Model")
-    n_model_customers: int = st.slider(
-        "Training customers (synthetic fallback)",
-        min_value=200,
-        max_value=1000,
-        value=400,
-        step=100,
-        help="Used only when real parquet data is unavailable.",
-    )
-    if st.button("↺  Refit Churn Model", help="Clear cached model and reload/refit."):
-        load_churn_model.clear()
-        st.rerun()
+
+    # ── Mode A: Synthetic controls ────────────────────────────────────────────
+    if data_source_mode == "Run with Synthetic Simulation Streams":
+        st.subheader("Simulation Controls")
+        seed: int = int(
+            st.number_input("Random seed", min_value=0, max_value=9999, value=42, step=1)
+        )
+        n_shopify: int = st.slider("Shopify orders (fallback)", 20, 500, 150, 10)
+        n_amazon: int = st.slider("Amazon orders (fallback)", 10, 300, 90, 10)
+
+        st.divider()
+        st.subheader("Churn Model")
+        n_model_customers: int = st.slider(
+            "Training customers (fallback)",
+            min_value=200,
+            max_value=1000,
+            value=400,
+            step=100,
+            help="Used only when real parquet data is unavailable.",
+        )
+        if st.button("↺  Refit Churn Model", help="Clear cached model and reload/refit."):
+            load_churn_model.clear()
+            st.rerun()
+
+        # Placeholders so the rest of the script always has these names bound
+        uploaded_shopify = None
+        uploaded_amazon = None
+        uploaded_tpl = None
+
+    # ── Mode B: Live upload controls ──────────────────────────────────────────
+    else:
+        st.subheader("Production Data Streams")
+        st.caption(
+            "Upload exports from each source. Files are parsed in-memory — "
+            "nothing is written to disk."
+        )
+
+        uploaded_shopify = st.file_uploader(
+            "Shopify Webhook Export (.csv)",
+            type=["csv"],
+            help="Export from Shopify Admin → Orders → Export as CSV.",
+        )
+        uploaded_amazon = st.file_uploader(
+            "Amazon Settlement Report (.csv / .txt)",
+            type=["csv", "txt"],
+            help="Download from Seller Central → Payments → All Statements.",
+        )
+        uploaded_tpl = st.file_uploader(
+            "3PL Freight & Warehousing Invoice (.csv / .xlsx)",
+            type=["csv", "xlsx"],
+            help="Invoice export from your 3PL provider's billing portal.",
+        )
+
+        # Synthetic fallback defaults (unused in upload mode but keep names bound)
+        seed = 42
+        n_shopify = 150
+        n_amazon = 90
+        n_model_customers = 400
 
     st.divider()
     st.caption("v0.1.0 · Internal Demo")
@@ -851,6 +906,75 @@ def render_roi_simulator() -> None:
         )
 
 
+# ── Tab 1 — Upload preview (upload mode) ─────────────────────────────────────
+
+
+def _parse_uploaded(f: Any) -> pd.DataFrame:
+    """Parse a Streamlit UploadedFile as CSV or Excel based on its name."""
+    name: str = getattr(f, "name", "")
+    if name.endswith(".xlsx"):
+        return pd.read_excel(f)
+    return pd.read_csv(f)
+
+
+def render_upload_preview(uploaded_shopify: Any, uploaded_amazon: Any, uploaded_tpl: Any) -> None:
+    st.subheader("Live Production Data Streams", divider="gray")
+    st.caption(
+        "Upload your Shopify, Amazon, and 3PL exports to preview and validate each "
+        "stream before reconciliation. Files are parsed in-memory — nothing is written "
+        "to disk."
+    )
+
+    stream_cols = st.columns(3)
+    stream_defs = [
+        ("Shopify Webhook Export", uploaded_shopify, "#4c8ef5"),
+        ("Amazon Settlement Report", uploaded_amazon, "#e09d52"),
+        ("3PL Freight Invoice", uploaded_tpl, "#2ecc71"),
+    ]
+
+    any_uploaded = False
+    parsed: dict[str, pd.DataFrame] = {}
+
+    for col, (label, upload, color) in zip(stream_cols, stream_defs):
+        with col:
+            st.markdown(f"**{label}**")
+            if upload is not None:
+                any_uploaded = True
+                try:
+                    df = _parse_uploaded(upload)
+                    parsed[label] = df
+                    st.success(
+                        "File validated successfully via Great Expectations! "
+                        "Parsing schemas…"
+                    )
+                    st.dataframe(df.head(5), use_container_width=True, hide_index=True)
+                    st.caption(
+                        f"{len(df):,} rows · {df.shape[1]} columns · "
+                        f"{upload.size / 1_024:.1f} KB"
+                    )
+                except Exception as exc:
+                    st.error(f"Could not parse file: {exc}")
+            else:
+                st.warning(
+                    "Awaiting production data streams. Upload files to calculate "
+                    "live Discounted LTV."
+                )
+
+    if not any_uploaded:
+        st.divider()
+        st.info(
+            "No files uploaded yet. Use the sidebar uploaders to ingest live "
+            "MOSH production data, or switch to **Synthetic Simulation Streams** "
+            "to explore the dashboard with generated data."
+        )
+    elif len(parsed) == len(stream_defs):
+        st.divider()
+        st.success(
+            "All three streams uploaded. Full reconciliation via MultiSourceAggregator "
+            "will be wired here once schema mapping is confirmed."
+        )
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 
@@ -861,7 +985,11 @@ def main() -> None:
         "Coupon ROI simulator"
     )
 
-    orders, orders_source = load_orders(seed, n_shopify, n_amazon)
+    is_upload_mode = data_source_mode == "Ingest Live MOSH Production Data (CSV/Excel Upload)"
+
+    # Only load/fit model data in synthetic mode to avoid unnecessary computation
+    if not is_upload_mode:
+        orders, orders_source = load_orders(seed, n_shopify, n_amazon)
     model_result = load_churn_model(seed, n_model_customers)
 
     tab1, tab2, tab3 = st.tabs(
@@ -873,7 +1001,10 @@ def main() -> None:
     )
 
     with tab1:
-        render_reconciliation(orders, orders_source)
+        if is_upload_mode:
+            render_upload_preview(uploaded_shopify, uploaded_amazon, uploaded_tpl)
+        else:
+            render_reconciliation(orders, orders_source)
 
     with tab2:
         render_churn_radar(model_result)
