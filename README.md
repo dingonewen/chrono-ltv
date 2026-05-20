@@ -338,3 +338,28 @@ make dashboard   # load real data + MLflow model
 ```
 
 Key test modules: `test_ingestion.py` (50 tests covering all three Pydantic schemas, `MultiSourceAggregator`, `IngestionValidator`, and cross-stream join integrity), `test_behavioral/` (invariance, directional, and minimum functionality tests for the survival model).
+
+---
+
+## Future Development Roadmap
+
+> **Current status: Prototype** — MOSH SYNAPSE is a fully functional proof-of-concept built on synthetic data and flat Parquet files. The architecture, model pipeline, and dashboard are production-grade in design; the items below represent the path from prototype to a hardened, self-service internal platform once access to real MOSH operational data is confirmed.
+
+### Infrastructure & Data Layer
+- **Cloud deployment on real infrastructure** — migrate from Streamlit Community Cloud to a scalable cloud host (AWS / GCP / Azure) capable of handling the full volume of live Shopify, Amazon, and 3PL data streams
+- **Persistent database backend** — replace Parquet flat files with a proper database (e.g., PostgreSQL or a data warehouse like BigQuery / Redshift) for transactional integrity, concurrent access, and historical querying
+- **Native multi-format ingestion** — extend the ingestion layer to handle all upstream data types natively: JSON webhook payloads (Shopify), flat-file CSVs (Amazon Seller Central reports), EDI/XML invoices (3PL carriers), and REST API polling schedules
+
+### Robustness & Operability
+- **Production-grade data wrangling** — add schema normalization, deduplication logic, and field-level reconciliation rules to handle the messiness of real omnichannel order data (partial shipments, split orders, currency conversions, refund cascades)
+- **Comprehensive error handling & alerting** — wrap all ingestion, transformation, and model inference paths with structured error handling, automatic retries, and Slack / email alerts on pipeline failures, so the platform runs with near-zero manual intervention
+- **Self-service operations for non-technical stakeholders** — simplify the operational interface so senior team members with no engineering background can upload data, trigger model refreshes, and pull reports without any command-line or code access
+
+### AI & Analytics Extensions
+- **LLM-powered insight agent** — integrate the Claude API to embed a conversational analytics assistant directly in the dashboard, allowing stakeholders to ask plain-English questions about revenue trends, churn risk, and campaign ROI and receive grounded, data-backed answers in real time
+- **Extended visualization suite** — add cohort retention heatmaps, geographic carrier performance maps, time-series GMV decomposition, and interactive funnel charts beyond the current static Matplotlib figures
+- **One-click presentation export** — generate boardroom-ready PDF / PowerPoint reports from any dashboard state, including live KPIs, survival curves, and LTV simulation outputs, directly from the UI
+
+### Model & Platform Evolution
+- **Live model retraining on real data** — validate and retune the CoxPH survival model against actual MOSH subscriber churn events; benchmark against XGBoost-AFT and DeepSurv once real labels are available
+- **Advanced AI agent orchestration** — as the AI agent ecosystem matures, evaluate and deploy the most robust, reliable, and cost-efficient agentic frameworks (multi-step reasoning, tool use, autonomous monitoring) to further reduce manual analytical overhead and surface insights proactively

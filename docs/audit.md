@@ -357,3 +357,32 @@ Skipped:  tests/unit/test_deepsurv.py — torch not installed
 ```
 
 No regressions. Coverage threshold met. The `test_ingestion.py` suite covers all three schema classes, `MultiSourceAggregator` (empty, Shopify-only, Amazon-only, mixed, and `to_transactions_df` paths), `IngestionValidator` (Shopify, Amazon, 3PL, and join integrity), and edge cases including numpy bool scalar truthiness, `base_rate > total_charge` rejection, and `updated_at < created_at` rejection.
+
+---
+
+## 6. Future Development Roadmap
+
+> **Prototype status** — MOSH SYNAPSE is a fully functional proof-of-concept. The pipeline architecture, Pydantic schemas, survival model, and dashboard are production-grade in design. The items below represent the engineering path from prototype to a hardened, self-service platform, contingent on access to real MOSH operational data for validation and deployment.
+
+### 6.1 Infrastructure & Data Layer
+
+- **Scalable cloud deployment** — migrate from Streamlit Community Cloud to a managed cloud environment (AWS ECS / GCP Cloud Run / Azure Container Apps) capable of sustaining the full volume of live Shopify webhooks, Amazon Seller Central settlements, and 3PL invoice streams without memory or concurrency constraints
+- **Persistent relational / analytical database** — replace Parquet flat files with a production database backend (PostgreSQL for transactional state, BigQuery or Redshift for analytical queries) to support concurrent access, audit trails, and long-horizon historical cohort analysis
+- **Native multi-format ingestion pipeline** — extend `MultiSourceAggregator` and the Pydantic schema layer to parse all upstream data formats natively: JSON webhook payloads (Shopify), flat-file CSVs and XML settlement reports (Amazon Seller Central), EDI/XML carrier invoices (3PL), and REST API polling with configurable refresh schedules
+
+### 6.2 Robustness & Operability
+
+- **Production-grade data wrangling** — implement schema normalization, order deduplication, and field-level reconciliation rules to handle real omnichannel edge cases: partial shipments, split orders, multi-currency conversions, refund cascades, and late-arriving 3PL records
+- **Comprehensive error handling & automated alerting** — wrap all ingestion, feature transformation, and model inference paths with structured exception handling, exponential-backoff retries, and Slack / email alerting on pipeline failures; target near-zero manual intervention for steady-state operations
+- **Self-service interface for non-technical stakeholders** — streamline the operational surface so senior team members with no engineering background can upload ledger files, trigger model refreshes, and generate reports without command-line or code access; minimal onboarding, minimal maintenance burden
+
+### 6.3 AI & Analytics Extensions
+
+- **LLM-powered insight agent (Claude API)** — embed a conversational analytics assistant in the dashboard using the Claude API, enabling stakeholders to ask plain-English questions about revenue trends, churn risk drivers, and campaign ROI and receive grounded, data-cited answers in real time without analyst intermediation
+- **Extended visualization suite** — add cohort retention heatmaps, geographic carrier performance maps, time-series GMV decomposition with seasonality overlays, and interactive survival curve comparators beyond the current static Matplotlib figures
+- **One-click boardroom report export** — generate PDF / PowerPoint presentations from any dashboard state — live KPIs, survival curves, LTV simulation outputs — directly from the UI, eliminating manual slide assembly for leadership reviews
+
+### 6.4 Model & Platform Evolution
+
+- **Real-data model validation and retuning** — validate and recalibrate the CoxPH survival model against actual MOSH subscriber churn events; benchmark C-index and IBS against XGBoost-AFT and DeepSurv alternatives once real event labels are available from production systems
+- **Advanced AI agent orchestration** — monitor and evaluate emerging agentic AI frameworks (multi-step reasoning, autonomous tool use, proactive monitoring agents) to deploy the most robust, reliable, and cost-efficient models for MOSH's operational intelligence needs, reducing manual analytical overhead and surfacing actionable signals proactively
