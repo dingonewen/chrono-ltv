@@ -21,6 +21,19 @@ MOSH SYNAPSE is an executive-facing internal analytics platform built for the MO
 
 ---
 
+## Screenshots
+
+**Tab 1 — Omnichannel Financial Reconciliation Engine**
+![Omnichannel Reconciliation](assets/tab1.jpg)
+
+**Tab 2 — Subscriber Retention & Survival Radar**
+![Subscriber Retention Radar](assets/tab2.jpg)
+
+**Tab 3 — Growth & Retention ROI Simulation Matrix**
+![Growth ROI Simulator](assets/tab3.jpg)
+
+---
+
 ## Architecture
 
 ```
