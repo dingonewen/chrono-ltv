@@ -79,6 +79,8 @@ _MOSH_RISK_COLORS = {
     "Critical":    "#8E44AD",
 }
 
+_LOGO_PATH = Path(__file__).parent.parent.parent / "assets" / "mosh_logo.png"
+
 # ── page config ───────────────────────────────────────────────────────────────
 
 st.set_page_config(
@@ -1113,11 +1115,16 @@ def render_upload_preview(uploaded_shopify: Any, uploaded_amazon: Any, uploaded_
 
 
 def main() -> None:
-    st.title("MOSH SYNAPSE: Intelligent Operations Dashboard")
-    st.caption(
-        "Omnichannel Revenue Reconciliation  ·  Subscriber Retention & Survival Intelligence  ·  "
-        "Growth & Retention ROI Simulation Matrix"
-    )
+    title_col, logo_col = st.columns([6, 1])
+    with title_col:
+        st.title("MOSH SYNAPSE: Intelligent Operations Dashboard")
+        st.caption(
+            "Omnichannel Revenue Reconciliation  ·  Subscriber Retention & Survival Intelligence  ·  "
+            "Growth & Retention ROI Simulation Matrix"
+        )
+    with logo_col:
+        if _LOGO_PATH.exists():
+            st.image(str(_LOGO_PATH), width=110)
 
     is_upload_mode = data_source_mode == "📥 MOSH Operations Portal: Direct Ledger Upload"
 
