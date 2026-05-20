@@ -38,9 +38,13 @@ Requires
 from __future__ import annotations
 
 import os
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+
+# Make chrono_ltv importable when running on Streamlit Cloud (no editable install)
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import numpy as np
 import pandas as pd
