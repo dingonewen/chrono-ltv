@@ -96,37 +96,33 @@ st.markdown(
         font-family: 'Inter', sans-serif !important;
     }
 
-    /* ── Headings: heavy, tight, uppercase ── */
+    /* ── Headings: heavy, tight ── */
     h1, h2, h3 {
         font-family: 'Inter', sans-serif !important;
         font-weight: 900 !important;
         letter-spacing: -0.02em !important;
-        text-transform: uppercase !important;
         color: #3A1164 !important;
     }
 
-    /* ── Tab labels: uppercase + bold ── */
+    /* ── Tab labels: bold ── */
     button[data-baseweb="tab"] > div {
         font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.06em !important;
+        letter-spacing: 0.03em !important;
         font-size: 0.75rem !important;
     }
 
-    /* ── Sidebar labels uppercase ── */
+    /* ── Sidebar labels ── */
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] .stRadio label {
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.04em !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.02em !important;
         font-size: 0.7rem !important;
     }
 
-    /* ── Buttons: uppercase, pill-shaped ── */
+    /* ── Buttons: pill-shaped ── */
     .stButton > button {
-        text-transform: uppercase !important;
         font-weight: 700 !important;
-        letter-spacing: 0.08em !important;
+        letter-spacing: 0.04em !important;
         border-radius: 24px !important;
         background-color: #60269E !important;
         color: #FFFFFF !important;
@@ -629,7 +625,7 @@ def load_churn_model(
 
 
 def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
-    st.subheader("MOSH OMNICHANNEL FINANCIAL RECONCILIATION ENGINE", divider="gray")
+    st.subheader("MOSH Omnichannel Financial Reconciliation Engine", divider="gray")
     st.caption(
         "Real-time ledger matching and net margin auditing across Shopify Storefront, "
         "Amazon Seller Central (FBA), and 3PL Last-Mile Freight Logistics."
@@ -683,7 +679,7 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
 
     with col_left:
         st.markdown(
-            f"**GROSS GMV VS. COST BREAKDOWN — BY {'PRODUCT CATEGORY' if source == 'parquet' else 'FULFILLMENT CHANNEL'}**"
+            f"**Gross GMV vs. Cost Breakdown — by {'Product Category' if source == 'parquet' else 'Fulfillment Channel'}**"
         )
         ch = (
             orders.groupby("channel")[
@@ -702,7 +698,7 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
         st.bar_chart(ch[["Gross GMV", fees_label, ship_label, "Net Contribution Margin"]])
 
     with col_right:
-        st.markdown("**MARGIN WATERFALL — AGGREGATE (USD)**")
+        st.markdown("**Margin Waterfall — Aggregate (USD)**")
         try:
             import matplotlib.pyplot as plt
 
@@ -721,7 +717,6 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
                     bar.get_height() + bar.get_y() + gross * 0.01,
                     _fmt_usd(val),
                     ha="center", va="bottom", fontsize=8, color=_MOSH_TEXT,
-                    fontweight="bold",
                 )
             ax.set_ylabel("USD", color=_MOSH_TEXT, fontsize=9)
             ax.tick_params(colors=_MOSH_TEXT)
@@ -753,7 +748,7 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
         and orders["carrier"].notna().any()
     )
     if has_carrier:
-        st.markdown("**LAST-MILE CARRIER DELAY RATE**")
+        st.markdown("**Last-Mile Carrier Delay Rate**")
         delay = (
             orders[orders.get("tpl_matched", False) == True]  # noqa: E712
             .groupby("carrier")["carrier_delay_status"]
@@ -765,7 +760,7 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
 
     st.divider()
 
-    st.markdown("**MOSH ORDER LEDGER — TRANSACTIONAL DETAIL**")
+    st.markdown("**MOSH Order Ledger — Transactional Detail**")
     channels = ["All"] + sorted(orders["channel"].dropna().unique().tolist())
     chosen = st.selectbox("Filter by Fulfillment Channel", channels, key="recon_channel")
     view = orders if chosen == "All" else orders[orders["channel"] == chosen]
@@ -802,7 +797,7 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
 
 
 def render_churn_radar(model_result: Any) -> None:
-    st.subheader("MOSH SUBSCRIBER RETENTION & SURVIVAL RADAR", divider="gray")
+    st.subheader("MOSH Subscriber Retention & Survival Radar", divider="gray")
     st.caption(
         "Advanced multi-modal survival networks predicting the exact optimal window for "
         "proactive member intervention before subscription churn."
@@ -876,9 +871,9 @@ def render_churn_radar(model_result: Any) -> None:
             tier_edges[1:4], ["Q25", "Q75", "Q90"], ["#2ECC71", "#F39C12", "#E74C3C"]
         ):
             ax_hist.axvline(edge, color=col, linestyle="--", linewidth=1.5, label=lbl)
-        ax_hist.set_xlabel("CHURN RISK INDEX", color=_MOSH_TEXT, fontsize=9, fontweight="bold")
-        ax_hist.set_ylabel("MEMBERS", color=_MOSH_TEXT, fontsize=9, fontweight="bold")
-        ax_hist.set_title("CHURN RISK INDEX DISTRIBUTION", color=_MOSH_TEXT, fontsize=10, fontweight="black")
+        ax_hist.set_xlabel("Churn Risk Index", color=_MOSH_TEXT, fontsize=9)
+        ax_hist.set_ylabel("Members", color=_MOSH_TEXT, fontsize=9)
+        ax_hist.set_title("Churn Risk Index Distribution", color=_MOSH_TEXT, fontsize=10, fontweight="bold")
         ax_hist.tick_params(colors=_MOSH_TEXT, labelsize=8)
         ax_hist.spines[:].set_color(_MOSH_BORDER)
         ax_hist.legend(fontsize=7, labelcolor=_MOSH_TEXT, facecolor=_MOSH_SEC_BG, edgecolor=_MOSH_BORDER)
@@ -893,9 +888,9 @@ def render_churn_radar(model_result: Any) -> None:
                 times_365, S_all[mask].mean(axis=0),
                 label=f"{tier} (n={int(mask.sum())})", color=color, linewidth=2.5,
             )
-        ax_surv.set_xlabel("DAYS FROM COHORT OBSERVATION", color=_MOSH_TEXT, fontsize=9, fontweight="bold")
-        ax_surv.set_ylabel("P(RETAINED)", color=_MOSH_TEXT, fontsize=9, fontweight="bold")
-        ax_surv.set_title("RETENTION SURVIVAL CURVES BY RISK TIER", color=_MOSH_TEXT, fontsize=10, fontweight="black")
+        ax_surv.set_xlabel("Days from Cohort Observation", color=_MOSH_TEXT, fontsize=9)
+        ax_surv.set_ylabel("P(Retained)", color=_MOSH_TEXT, fontsize=9)
+        ax_surv.set_title("Retention Survival Curves by Risk Tier", color=_MOSH_TEXT, fontsize=10, fontweight="bold")
         ax_surv.set_ylim(-0.02, 1.05)
         ax_surv.axhline(0.5, color=_MOSH_BORDER, linestyle=":", linewidth=1.5, label="S(t)=0.5")
         ax_surv.tick_params(colors=_MOSH_TEXT, labelsize=8)
@@ -913,7 +908,7 @@ def render_churn_radar(model_result: Any) -> None:
 
     st.divider()
 
-    st.markdown("**TOP 25 INTERVENTION-PRIORITY MEMBER ACCOUNTS**")
+    st.markdown("**Top 25 Intervention-Priority Member Accounts**")
     risk_df = pd.DataFrame(
         {
             "Member_Account_ID": X.index,
@@ -934,7 +929,7 @@ def render_churn_radar(model_result: Any) -> None:
 
 
 def render_roi_simulator() -> None:
-    st.subheader("MOSH GROWTH & RETENTION ROI SIMULATION MATRIX", divider="gray")
+    st.subheader("MOSH Growth & Retention ROI Simulation Matrix", divider="gray")
     st.caption(
         "Algorithmic forecasting of Gross LTV expansion and Margin Recovery ROI based on "
         "proactive incentive distribution and Discounted Cash Flow (DCF)."
@@ -943,19 +938,19 @@ def render_roi_simulator() -> None:
     col_sliders, col_results = st.columns([1, 2], gap="large")
 
     with col_sliders:
-        st.markdown("**MEMBER PURCHASE BEHAVIOR**")
+        st.markdown("**Member Purchase Behavior**")
         avg_order_value: float = st.slider("Avg. Order Value — AOV ($)", 10.0, 600.0, 85.0, 5.0)
         orders_per_month: float = st.slider("Purchase Frequency / Month (Baseline)", 0.2, 6.0, 1.2, 0.1)
         p_churn_pct: float = st.slider("Monthly Subscription Churn Rate (%)", 1.0, 40.0, 8.0, 0.5)
         cac: float = st.slider("Member Acquisition Cost — MAC ($)", 0.0, 500.0, 50.0, 10.0)
 
         st.divider()
-        st.markdown("**INCENTIVE DISTRIBUTION PARAMETERS**")
+        st.markdown("**Incentive Distribution Parameters**")
         coupon_pct: float = st.slider("Incentive Discount Rate (%)", 0.0, 50.0, 10.0, 1.0)
         freq_lift_pct: float = st.slider("Purchase Frequency Uplift (%)", 0.0, 150.0, 20.0, 5.0)
 
         st.divider()
-        st.markdown("**DCF VALUATION PARAMETERS**")
+        st.markdown("**DCF Valuation Parameters**")
         annual_dr_pct: float = st.slider("Annual Hurdle Rate (%)", 0.0, 40.0, 12.0, 1.0)
         horizon: int = st.slider("LTV Projection Horizon (months)", 6, 72, 24, 3)
 
@@ -1010,7 +1005,7 @@ def render_roi_simulator() -> None:
             )
 
         st.divider()
-        st.markdown("**MONTHLY DCF REVENUE PROJECTION**")
+        st.markdown("**Monthly DCF Revenue Projection**")
         st.line_chart(
             pd.DataFrame(
                 {"Baseline (No Incentive)": baseline_dcf, "Post-Incentive": coupon_dcf},
@@ -1019,7 +1014,7 @@ def render_roi_simulator() -> None:
             x_label="Month", y_label="DCF Cash Flow ($)",
         )
 
-        st.markdown("**CUMULATIVE DISCOUNTED MEMBER LTV**")
+        st.markdown("**Cumulative Discounted Member LTV**")
         st.line_chart(
             pd.DataFrame(
                 {"Baseline LTV": np.cumsum(baseline_dcf) - cac, "Post-Incentive LTV": np.cumsum(coupon_dcf) - cac},
@@ -1029,7 +1024,7 @@ def render_roi_simulator() -> None:
         )
 
         st.divider()
-        st.markdown("**BREAK-EVEN SENSITIVITY: FREQUENCY UPLIFT REQUIRED VS. INCENTIVE RATE**")
+        st.markdown("**Break-Even Sensitivity: Frequency Uplift Required vs. Incentive Rate**")
         coupon_range = np.arange(5, 55, 5)
         st.bar_chart(
             pd.DataFrame(
@@ -1052,7 +1047,7 @@ def _parse_uploaded(f: Any) -> pd.DataFrame:
 
 
 def render_upload_preview(uploaded_shopify: Any, uploaded_amazon: Any, uploaded_tpl: Any) -> None:
-    st.subheader("MOSH DIRECT LEDGER INGESTION — LIVE FEED PREVIEW", divider="gray")
+    st.subheader("MOSH Direct Ledger Ingestion — Live Feed Preview", divider="gray")
     st.caption(
         "Upload certified channel exports to preview and validate each operational data stream "
         "against the MOSH Ingestion Engine schema before full reconciliation. "
@@ -1114,7 +1109,7 @@ def render_upload_preview(uploaded_shopify: Any, uploaded_amazon: Any, uploaded_
 
 
 def main() -> None:
-    st.title("MOSH CHRONOLTV — EXECUTIVE OPERATIONS DASHBOARD")
+    st.title("MOSH SYNAPSE: Intelligent Operations Dashboard")
     st.caption(
         "Omnichannel Revenue Reconciliation  ·  Subscriber Retention & Survival Intelligence  ·  "
         "Growth & Retention ROI Simulation Matrix"
@@ -1129,9 +1124,9 @@ def main() -> None:
 
     tab1, tab2, tab3 = st.tabs(
         [
-            "📊  OMNICHANNEL RECONCILIATION",
-            "🔮  SUBSCRIBER RETENTION RADAR",
-            "💸  GROWTH ROI SIMULATOR",
+            "📊  Omnichannel Reconciliation",
+            "🔮  Subscriber Retention Radar",
+            "💸  Growth ROI Simulator",
         ]
     )
 
