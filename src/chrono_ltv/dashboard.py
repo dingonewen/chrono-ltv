@@ -60,60 +60,175 @@ _PARQUET_NAMES = [
     "survival_labels",
 ]
 
+# ── MOSH brand palette ────────────────────────────────────────────────────────
+
+_MOSH_PRIMARY    = "#60269E"   # Deep brand purple
+_MOSH_SEC_BG     = "#EFEAFF"   # Lavender — sidebar / cards
+_MOSH_BG         = "#F9F7FF"   # Warm lavender-white — page bg
+_MOSH_TEXT       = "#3A1164"   # Deep plum — headings and body
+_MOSH_BORDER     = "#D4C8F0"   # Soft purple — chart spines, dividers
+_MOSH_CHART_BG   = "#FFFFFF"   # Clean white — matplotlib plot area
+_MOSH_RISK_COLORS = {
+    "Low Risk":    "#2ECC71",
+    "Medium Risk": "#F39C12",
+    "High Risk":   "#E74C3C",
+    "Critical":    "#8E44AD",
+}
+
 # ── page config ───────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="ChronoLTV",
+    page_title="MOSH ChronoLTV",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
+# ── MOSH brand CSS injection ──────────────────────────────────────────────────
+
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+    /* ── Global font ── */
+    html, body, [class*="css"], .stApp {
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    /* ── Headings: heavy, tight, uppercase ── */
+    h1, h2, h3 {
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 900 !important;
+        letter-spacing: -0.02em !important;
+        text-transform: uppercase !important;
+        color: #3A1164 !important;
+    }
+
+    /* ── Tab labels: uppercase + bold ── */
+    button[data-baseweb="tab"] > div {
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.06em !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* ── Sidebar labels uppercase ── */
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] .stRadio label {
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+        font-size: 0.7rem !important;
+    }
+
+    /* ── Buttons: uppercase, pill-shaped ── */
+    .stButton > button {
+        text-transform: uppercase !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.08em !important;
+        border-radius: 24px !important;
+        background-color: #60269E !important;
+        color: #FFFFFF !important;
+        border: none !important;
+    }
+    .stButton > button:hover {
+        background-color: #7B35C4 !important;
+    }
+
+    /* ── Metric cards: rounded, lavender bg ── */
+    [data-testid="metric-container"] {
+        border-radius: 20px !important;
+        background-color: #EFEAFF !important;
+        padding: 1.1rem 1.2rem !important;
+        border: 1px solid #D4C8F0 !important;
+    }
+
+    /* ── Dataframe ── */
+    [data-testid="stDataFrame"] > div {
+        border-radius: 16px !important;
+        overflow: hidden !important;
+    }
+
+    /* ── Alert boxes ── */
+    [data-testid="stAlert"] {
+        border-radius: 16px !important;
+    }
+    div[class*="stSuccess"], div[class*="stInfo"],
+    div[class*="stWarning"], div[class*="stError"] {
+        border-radius: 16px !important;
+    }
+
+    /* ── Selectbox / dropdowns ── */
+    [data-testid="stSelectbox"] > div > div {
+        border-radius: 12px !important;
+    }
+
+    /* ── File uploader ── */
+    [data-testid="stFileUploader"] > section {
+        border-radius: 16px !important;
+        border: 2px dashed #D4C8F0 !important;
+    }
+
+    /* ── Slider track ── */
+    [data-testid="stSlider"] > div > div > div {
+        background-color: #EFEAFF !important;
+    }
+
+    /* ── Number input ── */
+    [data-testid="stNumberInput"] input {
+        border-radius: 12px !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # ── sidebar ───────────────────────────────────────────────────────────────────
 
 with st.sidebar:
-    st.title("ChronoLTV")
-    st.caption("Multi-source CLV & Churn Intelligence")
+    st.title("MOSH ChronoLTV")
+    st.caption("Omnichannel Revenue Intelligence & Member Retention Platform")
     st.divider()
 
     # ── Data Ingestion Control Panel ──────────────────────────────────────────
     st.subheader("Data Ingestion Control Panel")
     data_source_mode: str = st.radio(
-        "Data Source Mode",
+        "Operational Data Mode",
         options=[
-            "Run with Synthetic Simulation Streams",
-            "Ingest Live MOSH Production Data (CSV/Excel Upload)",
+            "⚡ MOSH Sandbox: Live Mock Generation",
+            "📥 MOSH Operations Portal: Direct Ledger Upload",
         ],
         index=0,
         help=(
-            "Synthetic mode uses either persisted parquet files or an in-memory "
-            "simulation. Upload mode accepts live exports from Shopify, Amazon, "
-            "and your 3PL provider."
+            "Sandbox mode generates realistic MOSH order streams for demo and QA "
+            "purposes. Direct Ledger Upload ingests live exports from Shopify "
+            "Storefront, Amazon Seller Central, and your 3PL freight partner."
         ),
     )
 
     st.divider()
 
-    # ── Mode A: Synthetic controls ────────────────────────────────────────────
-    if data_source_mode == "Run with Synthetic Simulation Streams":
-        st.subheader("Simulation Controls")
+    # ── Mode A: Sandbox controls ──────────────────────────────────────────────
+    if data_source_mode == "⚡ MOSH Sandbox: Live Mock Generation":
+        st.subheader("Sandbox Configuration")
         seed: int = int(
-            st.number_input("Random seed", min_value=0, max_value=9999, value=42, step=1)
+            st.number_input("Simulation Seed", min_value=0, max_value=9999, value=42, step=1)
         )
-        n_shopify: int = st.slider("Shopify orders (fallback)", 20, 500, 150, 10)
-        n_amazon: int = st.slider("Amazon orders (fallback)", 10, 300, 90, 10)
+        n_shopify: int = st.slider("Shopify Storefront Orders (Sandbox)", 20, 500, 150, 10)
+        n_amazon: int = st.slider("Amazon Seller Central Orders (Sandbox)", 10, 300, 90, 10)
 
         st.divider()
-        st.subheader("Churn Model")
+        st.subheader("Retention Model")
         n_model_customers: int = st.slider(
-            "Training customers (fallback)",
+            "Active Member Sample Size",
             min_value=200,
             max_value=1000,
             value=400,
             step=100,
-            help="Used only when real parquet data is unavailable.",
+            help="Number of member accounts used to fit the retention survival model when no production parquet data is available.",
         )
-        if st.button("↺  Refit Churn Model", help="Clear cached model and reload/refit."):
+        if st.button("↺  Refit Retention Model", help="Clear cached model and reload/refit from current data source."):
             load_churn_model.clear()
             st.rerun()
 
@@ -122,38 +237,38 @@ with st.sidebar:
         uploaded_amazon = None
         uploaded_tpl = None
 
-    # ── Mode B: Live upload controls ──────────────────────────────────────────
+    # ── Mode B: Direct Ledger Upload controls ─────────────────────────────────
     else:
-        st.subheader("Production Data Streams")
+        st.subheader("Live Operations Feeds")
         st.caption(
-            "Upload exports from each source. Files are parsed in-memory — "
-            "nothing is written to disk."
+            "Upload certified exports from each channel. All files are parsed "
+            "in-memory via the MOSH Ingestion Engine — no data is written to disk."
         )
 
         uploaded_shopify = st.file_uploader(
-            "Shopify Webhook Export (.csv)",
+            "Shopify Storefront Export (.csv)",
             type=["csv"],
-            help="Export from Shopify Admin → Orders → Export as CSV.",
+            help="Export from Shopify Admin → Orders → Export all orders as CSV.",
         )
         uploaded_amazon = st.file_uploader(
-            "Amazon Settlement Report (.csv / .txt)",
+            "Amazon Seller Central Settlement (.csv / .txt)",
             type=["csv", "txt"],
-            help="Download from Seller Central → Payments → All Statements.",
+            help="Download from Seller Central → Reports → Payments → All Statements.",
         )
         uploaded_tpl = st.file_uploader(
-            "3PL Freight & Warehousing Invoice (.csv / .xlsx)",
+            "3PL Last-Mile Freight Invoice (.csv / .xlsx)",
             type=["csv", "xlsx"],
-            help="Invoice export from your 3PL provider's billing portal.",
+            help="Invoice export from your 3PL provider's billing portal (ShipBob, Flexport, etc.).",
         )
 
-        # Synthetic fallback defaults (unused in upload mode but keep names bound)
+        # Sandbox fallback defaults (unused in upload mode but keep names bound)
         seed = 42
         n_shopify = 150
         n_amazon = 90
         n_model_customers = 400
 
     st.divider()
-    st.caption("v0.1.0 · Internal Demo")
+    st.caption("v0.1.0 · MOSH Executive Internal Tool")
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -514,23 +629,27 @@ def load_churn_model(
 
 
 def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
-    st.subheader("Unified Order Ledger", divider="gray")
+    st.subheader("MOSH OMNICHANNEL FINANCIAL RECONCILIATION ENGINE", divider="gray")
+    st.caption(
+        "Real-time ledger matching and net margin auditing across Shopify Storefront, "
+        "Amazon Seller Central (FBA), and 3PL Last-Mile Freight Logistics."
+    )
 
     # Data-source badge
     if source == "parquet":
         st.success(
-            f"**Data source:** `{_DATA_DIR}/transactions.parquet`  ·  "
-            f"{len(orders):,} transactions  ·  "
-            "platform_fees = discounts applied · shipping_cost = $0 (not in simulator data)"
+            f"**Live Ledger Source:** `{_DATA_DIR}/transactions.parquet`  ·  "
+            f"{len(orders):,} order records ingested  ·  "
+            "Platform_Fees mapped from storefront discounts · 3PL_Carrier_Fee = $0 (not captured in simulator export)"
         )
     else:
         st.warning(
-            f"**Data source: Synthetic** (no parquet files found in `{_DATA_DIR}`)  ·  "
-            "Run `make simulate` to generate real data."
+            f"**Ledger Source: MOSH Sandbox** (no production parquet files found in `{_DATA_DIR}`)  ·  "
+            "Run `make simulate` to generate a production-equivalent dataset."
         )
 
     if orders.empty:
-        st.error("No orders available. Adjust sidebar controls and try again.")
+        st.error("No order records available. Adjust the Sandbox Configuration and try again.")
         return
 
     # ── KPI row ──
@@ -539,11 +658,11 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
     shipping = orders["shipping_cost"].sum()
     net = orders["net_contribution_margin"].sum()
     margin_pct = net / gross * 100 if gross else 0
-    fees_label = "Discounts Applied" if source == "parquet" else "Platform Fees"
-    ship_label = "Returns Impact" if source == "parquet" else "3PL Shipping"
+    fees_label = "Storefront Discount Deductions" if source == "parquet" else "Channel Platform Fees"
+    ship_label = "Returns & Reversals" if source == "parquet" else "3PL Carrier Fees"
 
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Gross Revenue", _fmt_usd(gross))
+    k1.metric("Gross GMV", _fmt_usd(gross))
     k2.metric(
         fees_label,
         _fmt_usd(fees),
@@ -563,7 +682,9 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
     col_left, col_right = st.columns(2)
 
     with col_left:
-        st.markdown(f"**Revenue vs. Cost by {'Category' if source == 'parquet' else 'Channel'}**")
+        st.markdown(
+            f"**GROSS GMV VS. COST BREAKDOWN — BY {'PRODUCT CATEGORY' if source == 'parquet' else 'FULFILLMENT CHANNEL'}**"
+        )
         ch = (
             orders.groupby("channel")[
                 ["gross_revenue", "platform_fees", "shipping_cost", "net_contribution_margin"]
@@ -571,40 +692,41 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
             .sum()
             .rename(
                 columns={
-                    "gross_revenue": "Gross Revenue",
+                    "gross_revenue": "Gross GMV",
                     "platform_fees": fees_label,
                     "shipping_cost": ship_label,
-                    "net_contribution_margin": "Net Margin",
+                    "net_contribution_margin": "Net Contribution Margin",
                 }
             )
         )
-        st.bar_chart(ch[["Gross Revenue", fees_label, ship_label, "Net Margin"]])
+        st.bar_chart(ch[["Gross GMV", fees_label, ship_label, "Net Contribution Margin"]])
 
     with col_right:
-        st.markdown("**Fee Waterfall — Aggregate (USD)**")
+        st.markdown("**MARGIN WATERFALL — AGGREGATE (USD)**")
         try:
             import matplotlib.pyplot as plt
 
-            labels = ["Gross Revenue", fees_label, ship_label, "Net Margin"]
+            labels = ["Gross GMV", fees_label, ship_label, "Net Margin"]
             values = [gross, -fees, -shipping, net]
             bottoms = [0.0, gross, gross - fees, 0.0]
-            colors = ["#4c8ef5", "#e05252", "#e09d52", "#2ecc71"]
+            colors = [_MOSH_PRIMARY, "#E74C3C", "#F39C12", "#2ECC71"]
 
             fig, ax = plt.subplots(figsize=(5.5, 4))
-            fig.patch.set_facecolor("#0e1117")
-            ax.set_facecolor("#0e1117")
+            fig.patch.set_facecolor(_MOSH_BG)
+            ax.set_facecolor(_MOSH_CHART_BG)
             bars = ax.bar(labels, [abs(v) for v in values], bottom=bottoms, color=colors, width=0.5)
             for bar, val in zip(bars, values):
                 ax.text(
                     bar.get_x() + bar.get_width() / 2,
                     bar.get_height() + bar.get_y() + gross * 0.01,
                     _fmt_usd(val),
-                    ha="center", va="bottom", fontsize=8, color="white",
+                    ha="center", va="bottom", fontsize=8, color=_MOSH_TEXT,
+                    fontweight="bold",
                 )
-            ax.set_ylabel("USD", color="white")
-            ax.tick_params(colors="white")
-            ax.spines[:].set_color("#333")
-            plt.xticks(fontsize=8, color="white")
+            ax.set_ylabel("USD", color=_MOSH_TEXT, fontsize=9)
+            ax.tick_params(colors=_MOSH_TEXT)
+            ax.spines[:].set_color(_MOSH_BORDER)
+            plt.xticks(fontsize=8, color=_MOSH_TEXT)
             plt.tight_layout()
             st.pyplot(fig, use_container_width=True)
             plt.close(fig)
@@ -615,23 +737,23 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
 
     st.divider()
 
-    # 3PL match rate (synthetic only — real data has no carrier data)
+    # 3PL match rate (sandbox only — real data has no carrier data)
     if source != "parquet" and "tpl_matched" in orders.columns:
         matched_pct = orders["tpl_matched"].mean() * 100
         unmatched = int((~orders["tpl_matched"]).sum())
         st.info(
-            f"3PL match rate: **{matched_pct:.1f}%** of orders "
-            f"({unmatched} unmatched → shipping cost defaulted to $0)"
+            f"3PL ledger match rate: **{matched_pct:.1f}%** of orders reconciled to a freight invoice  "
+            f"({unmatched} unmatched → 3PL_Carrier_Fee defaulted to $0)"
         )
 
-    # Carrier delay chart (synthetic only)
+    # Last-mile carrier delay chart (sandbox only)
     has_carrier = (
         "carrier" in orders.columns
         and "carrier_delay_status" in orders.columns
         and orders["carrier"].notna().any()
     )
     if has_carrier:
-        st.markdown("**Carrier Delay Rate**")
+        st.markdown("**LAST-MILE CARRIER DELAY RATE**")
         delay = (
             orders[orders.get("tpl_matched", False) == True]  # noqa: E712
             .groupby("carrier")["carrier_delay_status"]
@@ -643,9 +765,9 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
 
     st.divider()
 
-    st.markdown("**Order Detail (filterable)**")
+    st.markdown("**MOSH ORDER LEDGER — TRANSACTIONAL DETAIL**")
     channels = ["All"] + sorted(orders["channel"].dropna().unique().tolist())
-    chosen = st.selectbox("Filter by channel / category", channels, key="recon_channel")
+    chosen = st.selectbox("Filter by Fulfillment Channel", channels, key="recon_channel")
     view = orders if chosen == "All" else orders[orders["channel"] == chosen]
     display_cols = [
         c for c in [
@@ -654,8 +776,23 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
             "net_contribution_margin", "delivery_status",
         ] if c in view.columns
     ]
+    col_rename = {
+        "universal_order_id": "MOSH_Order_Ref",
+        "customer_id": "Member_Account_ID",
+        "channel": "Fulfillment_Channel",
+        "fulfillment_type": "Fulfillment_Type",
+        "order_date": "Order_Date",
+        "gross_revenue": "Gross_GMV",
+        "platform_fees": "Platform_Fees",
+        "shipping_cost": "3PL_Carrier_Fee",
+        "net_contribution_margin": "Net_Contribution_Margin",
+        "delivery_status": "Delivery_Status",
+    }
     st.dataframe(
-        view[display_cols].sort_values("gross_revenue", ascending=False).head(300),
+        view[display_cols]
+        .sort_values("gross_revenue", ascending=False)
+        .head(300)
+        .rename(columns=col_rename),
         use_container_width=True,
         hide_index=True,
     )
@@ -665,12 +802,16 @@ def render_reconciliation(orders: pd.DataFrame, source: str) -> None:
 
 
 def render_churn_radar(model_result: Any) -> None:
-    st.subheader("Customer Churn Survival Radar", divider="gray")
+    st.subheader("MOSH SUBSCRIBER RETENTION & SURVIVAL RADAR", divider="gray")
+    st.caption(
+        "Advanced multi-modal survival networks predicting the exact optimal window for "
+        "proactive member intervention before subscription churn."
+    )
 
     if model_result is None or isinstance(model_result, Exception):
         err = str(model_result) if isinstance(model_result, Exception) else "unknown"
         st.warning(
-            "Churn model unavailable — install `survival` and `features` extras.\n\n"
+            "Retention model unavailable — install the `survival` and `features` extras.\n\n"
             f"Details: `{err}`"
         )
         st.code("pip install -e '.[survival,features]'")
@@ -680,11 +821,11 @@ def render_churn_radar(model_result: Any) -> None:
 
     # Source badge
     if source_label.startswith("mlflow"):
-        st.success(f"**Model source:** MLflow  ·  `{source_label}`")
+        st.success(f"**Model Registry Source:** MLflow  ·  `{source_label}`")
     elif source_label.startswith("parquet"):
-        st.info(f"**Model source:** {source_label}")
+        st.info(f"**Model Source:** Production Parquet  ·  {source_label}")
     else:
-        st.warning(f"**Model source:** {source_label}")
+        st.warning(f"**Model Source:** MOSH Sandbox  ·  {source_label}")
 
     n = len(X)
     risk_scores = model.predict_risk_score(X)
@@ -706,18 +847,18 @@ def render_churn_radar(model_result: Any) -> None:
 
     finite_med = medians[np.isfinite(medians)]
     k1, k2, k3, k4 = st.columns(4)
-    k1.metric("Customers Modelled", f"{n:,}")
+    k1.metric("Active Members Analyzed", f"{n:,}")
     k2.metric(
-        "Median Survival",
+        "Median Subscription Runway",
         f"{np.median(finite_med):.0f} days" if len(finite_med) else "N/A",
     )
     k3.metric(
-        "High + Critical Risk",
+        "Intervention-Priority Members",
         f"{(tier_counts.get('High Risk', 0) + tier_counts.get('Critical', 0)):,}",
-        delta=f"{(tier_counts.get('High Risk', 0) + tier_counts.get('Critical', 0)) / n * 100:.1f}% of base",
+        delta=f"{(tier_counts.get('High Risk', 0) + tier_counts.get('Critical', 0)) / n * 100:.1f}% of member base",
         delta_color="inverse",
     )
-    k4.metric("Avg Risk Score", f"{float(np.mean(risk_scores)):.3f}")
+    k4.metric("Mean Churn Risk Index", f"{float(np.mean(risk_scores)):.3f}")
 
     st.divider()
 
@@ -725,72 +866,65 @@ def render_churn_radar(model_result: Any) -> None:
         import matplotlib.gridspec as gridspec
         import matplotlib.pyplot as plt
 
-        _TIER_COLORS = {
-            "Low Risk": "#2ecc71",
-            "Medium Risk": "#f39c12",
-            "High Risk": "#e74c3c",
-            "Critical": "#8e44ad",
-        }
-
-        fig = plt.figure(figsize=(14, 5), facecolor="#0e1117")
+        fig = plt.figure(figsize=(14, 5), facecolor=_MOSH_BG)
         gs = gridspec.GridSpec(1, 2, figure=fig, wspace=0.35)
 
         ax_hist = fig.add_subplot(gs[0, 0])
-        ax_hist.set_facecolor("#0e1117")
-        ax_hist.hist(risk_scores, bins=35, color="#4c8ef5", edgecolor="#0e1117", alpha=0.85)
+        ax_hist.set_facecolor(_MOSH_CHART_BG)
+        ax_hist.hist(risk_scores, bins=35, color=_MOSH_PRIMARY, edgecolor=_MOSH_BG, alpha=0.85)
         for edge, lbl, col in zip(
-            tier_edges[1:4], ["Q25", "Q75", "Q90"], ["#2ecc71", "#f39c12", "#e74c3c"]
+            tier_edges[1:4], ["Q25", "Q75", "Q90"], ["#2ECC71", "#F39C12", "#E74C3C"]
         ):
-            ax_hist.axvline(edge, color=col, linestyle="--", linewidth=1, label=lbl)
-        ax_hist.set_xlabel("Risk Score", color="white", fontsize=9)
-        ax_hist.set_ylabel("Customers", color="white", fontsize=9)
-        ax_hist.set_title("Risk Score Distribution", color="white", fontsize=10)
-        ax_hist.tick_params(colors="white", labelsize=8)
-        ax_hist.spines[:].set_color("#333")
-        ax_hist.legend(fontsize=7, labelcolor="white", facecolor="#1a1a2e", edgecolor="#333")
+            ax_hist.axvline(edge, color=col, linestyle="--", linewidth=1.5, label=lbl)
+        ax_hist.set_xlabel("CHURN RISK INDEX", color=_MOSH_TEXT, fontsize=9, fontweight="bold")
+        ax_hist.set_ylabel("MEMBERS", color=_MOSH_TEXT, fontsize=9, fontweight="bold")
+        ax_hist.set_title("CHURN RISK INDEX DISTRIBUTION", color=_MOSH_TEXT, fontsize=10, fontweight="black")
+        ax_hist.tick_params(colors=_MOSH_TEXT, labelsize=8)
+        ax_hist.spines[:].set_color(_MOSH_BORDER)
+        ax_hist.legend(fontsize=7, labelcolor=_MOSH_TEXT, facecolor=_MOSH_SEC_BG, edgecolor=_MOSH_BORDER)
 
         ax_surv = fig.add_subplot(gs[0, 1])
-        ax_surv.set_facecolor("#0e1117")
-        for tier, color in _TIER_COLORS.items():
+        ax_surv.set_facecolor(_MOSH_CHART_BG)
+        for tier, color in _MOSH_RISK_COLORS.items():
             mask = tier_labels_arr == tier
             if mask.sum() == 0:
                 continue
             ax_surv.plot(
                 times_365, S_all[mask].mean(axis=0),
-                label=f"{tier} (n={int(mask.sum())})", color=color, linewidth=2,
+                label=f"{tier} (n={int(mask.sum())})", color=color, linewidth=2.5,
             )
-        ax_surv.set_xlabel("Days from Observation", color="white", fontsize=9)
-        ax_surv.set_ylabel("P(Survived)", color="white", fontsize=9)
-        ax_surv.set_title("Survival Curves by Risk Tier", color="white", fontsize=10)
+        ax_surv.set_xlabel("DAYS FROM COHORT OBSERVATION", color=_MOSH_TEXT, fontsize=9, fontweight="bold")
+        ax_surv.set_ylabel("P(RETAINED)", color=_MOSH_TEXT, fontsize=9, fontweight="bold")
+        ax_surv.set_title("RETENTION SURVIVAL CURVES BY RISK TIER", color=_MOSH_TEXT, fontsize=10, fontweight="black")
         ax_surv.set_ylim(-0.02, 1.05)
-        ax_surv.axhline(0.5, color="#aaa", linestyle=":", linewidth=1, label="S(t)=0.5")
-        ax_surv.tick_params(colors="white", labelsize=8)
-        ax_surv.spines[:].set_color("#333")
-        ax_surv.legend(fontsize=7, labelcolor="white", facecolor="#1a1a2e", edgecolor="#333")
+        ax_surv.axhline(0.5, color=_MOSH_BORDER, linestyle=":", linewidth=1.5, label="S(t)=0.5")
+        ax_surv.tick_params(colors=_MOSH_TEXT, labelsize=8)
+        ax_surv.spines[:].set_color(_MOSH_BORDER)
+        ax_surv.legend(fontsize=7, labelcolor=_MOSH_TEXT, facecolor=_MOSH_SEC_BG, edgecolor=_MOSH_BORDER)
 
         st.pyplot(fig, use_container_width=True)
         plt.close(fig)
     except ImportError:
         st.line_chart(
-            pd.DataFrame({"Mean Survival P": S_all.mean(axis=0)}, index=times_365.astype(int)),
+            pd.DataFrame({"Mean Retention P": S_all.mean(axis=0)}, index=times_365.astype(int)),
             x_label="Days",
-            y_label="Survival Probability",
+            y_label="Retention Probability",
         )
 
     st.divider()
 
-    st.markdown("**Top 25 At-Risk Customers**")
+    st.markdown("**TOP 25 INTERVENTION-PRIORITY MEMBER ACCOUNTS**")
     risk_df = pd.DataFrame(
         {
-            "customer_id": X.index,
-            "risk_score": risk_scores.round(4),
-            "median_survival_days": np.where(np.isfinite(medians), medians.round(0), -1),
-            "risk_tier": tier_labels_arr,
+            "Member_Account_ID": X.index,
+            "Churn_Risk_Index": risk_scores.round(4),
+            "Subscription_Runway_Days": np.where(np.isfinite(medians), medians.round(0), -1),
+            "Retention_Risk_Tier": tier_labels_arr,
         }
     )
-    top = risk_df.sort_values("risk_score", ascending=False).head(25).reset_index(drop=True)
+    top = risk_df.sort_values("Churn_Risk_Index", ascending=False).head(25).reset_index(drop=True)
     top.index += 1
-    top["median_survival_days"] = top["median_survival_days"].apply(
+    top["Subscription_Runway_Days"] = top["Subscription_Runway_Days"].apply(
         lambda v: f"{v:.0f}" if v > 0 else "≥ 365"
     )
     st.dataframe(top, use_container_width=True)
@@ -800,30 +934,30 @@ def render_churn_radar(model_result: Any) -> None:
 
 
 def render_roi_simulator() -> None:
-    st.subheader("Discounted Cash-Flow LTV Simulator", divider="gray")
+    st.subheader("MOSH GROWTH & RETENTION ROI SIMULATION MATRIX", divider="gray")
     st.caption(
-        "Model the financial impact of coupon interventions on customer lifetime value. "
-        "All values are forward-looking projections."
+        "Algorithmic forecasting of Gross LTV expansion and Margin Recovery ROI based on "
+        "proactive incentive distribution and Discounted Cash Flow (DCF)."
     )
 
     col_sliders, col_results = st.columns([1, 2], gap="large")
 
     with col_sliders:
-        st.markdown("**Customer & Order Parameters**")
-        avg_order_value: float = st.slider("Avg. Order Value ($)", 10.0, 600.0, 85.0, 5.0)
-        orders_per_month: float = st.slider("Orders / Month (baseline)", 0.2, 6.0, 1.2, 0.1)
-        p_churn_pct: float = st.slider("Monthly Churn Probability (%)", 1.0, 40.0, 8.0, 0.5)
-        cac: float = st.slider("Customer Acquisition Cost ($)", 0.0, 500.0, 50.0, 10.0)
+        st.markdown("**MEMBER PURCHASE BEHAVIOR**")
+        avg_order_value: float = st.slider("Avg. Order Value — AOV ($)", 10.0, 600.0, 85.0, 5.0)
+        orders_per_month: float = st.slider("Purchase Frequency / Month (Baseline)", 0.2, 6.0, 1.2, 0.1)
+        p_churn_pct: float = st.slider("Monthly Subscription Churn Rate (%)", 1.0, 40.0, 8.0, 0.5)
+        cac: float = st.slider("Member Acquisition Cost — MAC ($)", 0.0, 500.0, 50.0, 10.0)
 
         st.divider()
-        st.markdown("**Coupon Intervention**")
-        coupon_pct: float = st.slider("Coupon Discount (%)", 0.0, 50.0, 10.0, 1.0)
-        freq_lift_pct: float = st.slider("Frequency Lift (%)", 0.0, 150.0, 20.0, 5.0)
+        st.markdown("**INCENTIVE DISTRIBUTION PARAMETERS**")
+        coupon_pct: float = st.slider("Incentive Discount Rate (%)", 0.0, 50.0, 10.0, 1.0)
+        freq_lift_pct: float = st.slider("Purchase Frequency Uplift (%)", 0.0, 150.0, 20.0, 5.0)
 
         st.divider()
-        st.markdown("**Financial Parameters**")
-        annual_dr_pct: float = st.slider("Annual Discount Rate (%)", 0.0, 40.0, 12.0, 1.0)
-        horizon: int = st.slider("Projection Horizon (months)", 6, 72, 24, 3)
+        st.markdown("**DCF VALUATION PARAMETERS**")
+        annual_dr_pct: float = st.slider("Annual Hurdle Rate (%)", 0.0, 40.0, 12.0, 1.0)
+        horizon: int = st.slider("LTV Projection Horizon (months)", 6, 72, 24, 3)
 
     p_churn = p_churn_pct / 100
     coupon_rate = coupon_pct / 100
@@ -846,63 +980,63 @@ def render_roi_simulator() -> None:
 
     with col_results:
         m1, m2, m3 = st.columns(3)
-        m1.metric("Baseline LTV", _fmt_usd(ltv_baseline))
+        m1.metric("Baseline Gross LTV", _fmt_usd(ltv_baseline))
         m2.metric(
-            "LTV with Coupon",
+            "Projected LTV Post-Incentive",
             _fmt_usd(ltv_coupon),
             delta=f"{_fmt_usd(delta_ltv)} ({delta_ltv / abs(ltv_baseline) * 100:+.1f}%)"
             if ltv_baseline != 0 else _fmt_usd(delta_ltv),
         )
         m3.metric(
-            "Net Revenue Ratio",
+            "Net Revenue Retention Ratio",
             f"{net_rev_ratio:.3f}×",
-            delta="profitable" if coupon_positive else "unprofitable",
+            delta="margin-accretive" if coupon_positive else "margin-dilutive",
             delta_color="normal" if coupon_positive else "inverse",
         )
 
         if coupon_rate == 0:
-            st.info("Set a coupon discount above 0 % to model an intervention.")
+            st.info("Configure an Incentive Discount Rate above 0% to model a retention intervention.")
         elif coupon_positive:
             st.success(
-                f"Coupon is **net-positive** — ratio {net_rev_ratio:.3f}× > 1.0. "
-                f"Break-even requires **{required_lift_pct:.1f} %** lift "
-                f"(current: {freq_lift_pct:.1f} %)."
+                f"Incentive is **margin-accretive** — Net Revenue Retention Ratio {net_rev_ratio:.3f}× > 1.0. "
+                f"Break-even requires **{required_lift_pct:.1f}%** frequency uplift "
+                f"(current configuration: {freq_lift_pct:.1f}%)."
             )
         else:
             st.error(
-                f"Coupon is **net-negative** — ratio {net_rev_ratio:.3f}× < 1.0. "
-                f"Need **{required_lift_pct:.1f} %** frequency lift to break even "
-                f"(current: {freq_lift_pct:.1f} %)."
+                f"Incentive is **margin-dilutive** — Net Revenue Retention Ratio {net_rev_ratio:.3f}× < 1.0. "
+                f"Requires **{required_lift_pct:.1f}%** purchase frequency uplift to reach break-even "
+                f"(current configuration: {freq_lift_pct:.1f}%)."
             )
 
         st.divider()
-        st.markdown("**Monthly DCF Cash-Flow Projection**")
+        st.markdown("**MONTHLY DCF REVENUE PROJECTION**")
         st.line_chart(
             pd.DataFrame(
-                {"Baseline (No Coupon)": baseline_dcf, "With Coupon": coupon_dcf},
+                {"Baseline (No Incentive)": baseline_dcf, "Post-Incentive": coupon_dcf},
                 index=months,
             ).rename_axis("Month"),
             x_label="Month", y_label="DCF Cash Flow ($)",
         )
 
-        st.markdown("**Cumulative Discounted LTV**")
+        st.markdown("**CUMULATIVE DISCOUNTED MEMBER LTV**")
         st.line_chart(
             pd.DataFrame(
-                {"Baseline": np.cumsum(baseline_dcf) - cac, "With Coupon": np.cumsum(coupon_dcf) - cac},
+                {"Baseline LTV": np.cumsum(baseline_dcf) - cac, "Post-Incentive LTV": np.cumsum(coupon_dcf) - cac},
                 index=months,
             ).rename_axis("Month"),
             x_label="Month", y_label="Cumulative LTV ($)",
         )
 
         st.divider()
-        st.markdown("**Break-Even Sensitivity: Freq. Lift Needed vs. Coupon Rate**")
+        st.markdown("**BREAK-EVEN SENSITIVITY: FREQUENCY UPLIFT REQUIRED VS. INCENTIVE RATE**")
         coupon_range = np.arange(5, 55, 5)
         st.bar_chart(
             pd.DataFrame(
-                {"Required Freq. Lift (%)": (coupon_range / 100) / (1 - coupon_range / 100) * 100},
+                {"Required Frequency Uplift (%)": (coupon_range / 100) / (1 - coupon_range / 100) * 100},
                 index=coupon_range,
-            ).rename_axis("Coupon Discount (%)"),
-            x_label="Coupon Discount (%)", y_label="Min Frequency Lift (%)",
+            ).rename_axis("Incentive Discount Rate (%)"),
+            x_label="Incentive Discount Rate (%)", y_label="Min Frequency Uplift (%)",
         )
 
 
@@ -918,18 +1052,18 @@ def _parse_uploaded(f: Any) -> pd.DataFrame:
 
 
 def render_upload_preview(uploaded_shopify: Any, uploaded_amazon: Any, uploaded_tpl: Any) -> None:
-    st.subheader("Live Production Data Streams", divider="gray")
+    st.subheader("MOSH DIRECT LEDGER INGESTION — LIVE FEED PREVIEW", divider="gray")
     st.caption(
-        "Upload your Shopify, Amazon, and 3PL exports to preview and validate each "
-        "stream before reconciliation. Files are parsed in-memory — nothing is written "
-        "to disk."
+        "Upload certified channel exports to preview and validate each operational data stream "
+        "against the MOSH Ingestion Engine schema before full reconciliation. "
+        "All files are processed in-memory — no data is persisted to disk."
     )
 
     stream_cols = st.columns(3)
     stream_defs = [
-        ("Shopify Webhook Export", uploaded_shopify, "#4c8ef5"),
-        ("Amazon Settlement Report", uploaded_amazon, "#e09d52"),
-        ("3PL Freight Invoice", uploaded_tpl, "#2ecc71"),
+        ("Shopify Storefront", uploaded_shopify, "#4c8ef5"),
+        ("Amazon Seller Central", uploaded_amazon, "#e09d52"),
+        ("3PL Last-Mile Logistics", uploaded_tpl, "#2ecc71"),
     ]
 
     any_uploaded = False
@@ -949,11 +1083,11 @@ def render_upload_preview(uploaded_shopify: Any, uploaded_amazon: Any, uploaded_
                     )
                     st.dataframe(df.head(5), use_container_width=True, hide_index=True)
                     st.caption(
-                        f"{len(df):,} rows · {df.shape[1]} columns · "
+                        f"{len(df):,} records · {df.shape[1]} fields · "
                         f"{upload.size / 1_024:.1f} KB"
                     )
                 except Exception as exc:
-                    st.error(f"Could not parse file: {exc}")
+                    st.error(f"Ingestion error — could not parse file: {exc}")
             else:
                 st.warning(
                     "Awaiting production data streams. Upload files to calculate "
@@ -963,15 +1097,16 @@ def render_upload_preview(uploaded_shopify: Any, uploaded_amazon: Any, uploaded_
     if not any_uploaded:
         st.divider()
         st.info(
-            "No files uploaded yet. Use the sidebar uploaders to ingest live "
-            "MOSH production data, or switch to **Synthetic Simulation Streams** "
-            "to explore the dashboard with generated data."
+            "No operational feeds uploaded. Use the **Live Operations Feeds** panel in the sidebar "
+            "to ingest live MOSH channel data, or switch to "
+            "**⚡ MOSH Sandbox: Live Mock Generation** to explore the full dashboard."
         )
     elif len(parsed) == len(stream_defs):
         st.divider()
         st.success(
-            "All three streams uploaded. Full reconciliation via MultiSourceAggregator "
-            "will be wired here once schema mapping is confirmed."
+            "All three operational feeds validated and ingested. "
+            "Full omnichannel reconciliation via the MOSH MultiSource Aggregation Engine "
+            "will be activated once production schema mapping is confirmed with the Data Engineering team."
         )
 
 
@@ -979,24 +1114,24 @@ def render_upload_preview(uploaded_shopify: Any, uploaded_amazon: Any, uploaded_
 
 
 def main() -> None:
-    st.title("ChronoLTV — Analytics Dashboard")
+    st.title("MOSH CHRONOLTV — EXECUTIVE OPERATIONS DASHBOARD")
     st.caption(
-        "Real-time multi-source revenue reconciliation · Churn survival radar · "
-        "Coupon ROI simulator"
+        "Omnichannel Revenue Reconciliation  ·  Subscriber Retention & Survival Intelligence  ·  "
+        "Growth & Retention ROI Simulation Matrix"
     )
 
-    is_upload_mode = data_source_mode == "Ingest Live MOSH Production Data (CSV/Excel Upload)"
+    is_upload_mode = data_source_mode == "📥 MOSH Operations Portal: Direct Ledger Upload"
 
-    # Only load/fit model data in synthetic mode to avoid unnecessary computation
+    # Only load/fit model data in sandbox mode to avoid unnecessary computation
     if not is_upload_mode:
         orders, orders_source = load_orders(seed, n_shopify, n_amazon)
     model_result = load_churn_model(seed, n_model_customers)
 
     tab1, tab2, tab3 = st.tabs(
         [
-            "📊  Multi-Source Reconciliation",
-            "🎯  Survival Churn Radar",
-            "💰  ROI Intervention Simulator",
+            "📊  OMNICHANNEL RECONCILIATION",
+            "🔮  SUBSCRIBER RETENTION RADAR",
+            "💸  GROWTH ROI SIMULATOR",
         ]
     )
 

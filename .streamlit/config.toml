@@ -1,0 +1,6 @@
+[theme]
+primaryColor        = "#60269E"   # MOSH Primary — deep brand purple
+secondaryBackgroundColor = "#EFEAFF"  # Sidebar / card containers — lavender
+backgroundColor     = "#F9F7FF"   # Page background — warm lavender-white
+textColor           = "#3A1164"   # Body text — deep plum
+font                = "sans serif"
