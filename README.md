@@ -7,9 +7,17 @@ Live demo: [mosh-synapse.streamlit.app](https://dashboardpy-zixanuxvfqyht829ksb6
 
 ---
 
+## Overview
+
+MOSH SYNAPSE is a production-grade analytics platform modeled after the operational structure of a real omnichannel e-commerce and subscription business. The domain, data schema, and business logic are grounded in how companies like MOSH — selling across Shopify, Amazon FBA/FBM, and third-party logistics — actually operate and measure performance.
+
+**The underlying pipeline is fully domain-agnostic.** The survival analysis churn model, DCF LTV simulator, multi-source reconciliation engine, and drift monitoring stack can be adapted to any subscription or repeat-purchase business with equivalent data streams. The MOSH implementation serves as a concrete, real-world reference architecture.
+
+All data used in this project is synthetic and generated programmatically — no proprietary or confidential business data is included.
+
 ## What It Does
 
-MOSH SYNAPSE is an executive-facing internal analytics platform built for the MOSH e-commerce and supply chain team. It ingests order data from Shopify Storefront, Amazon Seller Central (FBA/FBM), and 3PL last-mile freight logistics, reconciles them into a unified ledger, and layers on a survival analysis churn model with a DCF-based LTV simulator.
+MOSH SYNAPSE is an executive-facing analytics platform that ingests order data from Shopify Storefront, Amazon Seller Central (FBA/FBM), and 3PL last-mile freight logistics, reconciles them into a unified contribution margin ledger, and layers on a survival analysis churn model with a DCF-based LTV simulator.
 
 **Three operational tabs:**
 
